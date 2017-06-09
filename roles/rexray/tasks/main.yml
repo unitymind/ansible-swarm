@@ -17,7 +17,7 @@
     state: directory
     mode: 0755
 
-- name: Generate /etc/rexray/config.yml
+- name: Generate /etc/rexray/config.yml for Virtualbox
   become: true
   template:
     src: rexray_config_virtualbox.j2.yml
@@ -26,7 +26,7 @@
   register: rexray_config
   when: rexray_storage_type == "virtualbox"
 
-- name: Generate /etc/rexray/config.yml
+- name: Generate /etc/rexray/config.yml for Digitalocean
   become: true
   template:
     src: rexray_config_digitalocean.j2.yml
