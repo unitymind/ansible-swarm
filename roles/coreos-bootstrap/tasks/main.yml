@@ -1,6 +1,6 @@
 ---
 - name: Check if bootstrap is needed
-  raw: stat /home/core/.boostrapped
+  raw: stat /home/core/.bootstrapped
   register: need_bootstrap
   changed_when: False
   ignore_errors: True
@@ -16,7 +16,7 @@
     - need_bootstrap | failed
     - bootstrap_type == "remote"
 
-- name: Run Anaconda2-4.4.0 installer
+- name: Run bootstrap-vagrant.sh
   script: bootstrap-vagrant.sh
   when:
     - need_bootstrap | failed
