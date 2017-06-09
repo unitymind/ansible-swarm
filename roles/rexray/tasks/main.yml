@@ -26,7 +26,7 @@
   register: rexray_config
   when: rexray.storage_type == "virtualbox"
 
-- name: Generate /etc/rexray/config.yml for Digitalocean
+- name: Generate /etc/rexray/config.yml for DigitalOcean
   become: true
   template:
     src: rexray_config_digitalocean.j2.yml
