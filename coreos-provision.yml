@@ -2,7 +2,7 @@
   gather_facts: False
   roles:
     - coreos-bootstrap
-    
+
 - hosts: all
   roles:
     - docker-tuning
