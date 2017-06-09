@@ -1,4 +1,0 @@
-libstorage:
-  service: virtualbox
-virtualbox:
-  volumePath: /Users/unitymind/.vagrant/volumes

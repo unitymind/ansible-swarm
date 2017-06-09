@@ -1,0 +1,9 @@
+libstorage:
+  service: dobs
+  server:
+    services:
+      dobs:
+        driver: dobs
+        dobs:
+          token: "{{ digitalocean_token }}"
+          region: "{{ digitalocean_region }}"
