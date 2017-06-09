@@ -5,5 +5,5 @@ libstorage:
       dobs:
         driver: dobs
         dobs:
-          token: "{{ digitalocean.token }}"
-          region: "{{ digitalocean.region }}"
+          token: "{{ rexray.digitalocean.token }}"
+          region: "{{ reexray.digitalocean.region }}"

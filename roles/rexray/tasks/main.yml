@@ -7,7 +7,7 @@
 - name: Install Rexray
   become: true
   shell: curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
-  when: rexray_file.stat.exists == False or reinstall_rexray == True
+  when: rexray_file.stat.exists == False or rexray.reinstall == True
   register: rexray_installed
 
 - name: Make /etc/rexray directory
@@ -24,7 +24,7 @@
     dest: /etc/rexray/config.yml
     mode: 0600
   register: rexray_config
-  when: rexray_storage_type == "virtualbox"
+  when: rexray.storage_type == "virtualbox"
 
 - name: Generate /etc/rexray/config.yml for Digitalocean
   become: true
@@ -33,7 +33,7 @@
     dest: /etc/rexray/config.yml
     mode: 0600
   register: rexray_config
-  when: rexray_storage_type == "digitalocean"
+  when: rexray.storage_type == "digitalocean"
 
 - name: Restart if nedeed
   become: true
