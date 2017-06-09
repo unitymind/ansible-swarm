@@ -9,5 +9,3 @@
   roles:
     - docker-tuning
     - { role: rexray, reinstall_rexray: False }
-
-- include: swarm.yml
