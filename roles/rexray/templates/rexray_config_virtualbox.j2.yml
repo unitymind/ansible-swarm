@@ -1,4 +1,4 @@
 libstorage:
   service: virtualbox
 virtualbox:
-  volumePath: "{{ virtualbox_volume_path }}"
+  volumePath: "{{ virtualbox.volume_path }}"
