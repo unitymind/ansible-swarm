@@ -1,0 +1,23 @@
+---
+- name: Check if bootstrap is needed
+  raw: "{{ ansible_python_interpreter }} --version"
+  register: need_bootstrap
+  changed_when: False
+  ignore_errors: True
+
+- debug:
+    msg: This action take a somewhile. Please be patient and don't worry :)
+  when:
+    - need_bootstrap | failed
+
+- name: Run bootstrap-anaconda.sh
+  script: bootstrap-anaconda.sh
+  when:
+    - need_bootstrap | failed
+    - bootstrap_type == "remote"
+
+- name: Run Anaconda2-4.4.0 installer
+  raw: /usr/bin/bash /home/core/opt/Anaconda2-4.4.0-Linux-x86_64.sh -b
+  when:
+    - need_bootstrap | failed
+    - bootstrap_type == "vagrant"

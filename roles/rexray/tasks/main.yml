@@ -1,0 +1,38 @@
+---
+- name: Check if Rexray installed
+  stat:
+    path: /opt/bin/rexray
+  register: rexray_file
+
+- name: Install Rexray
+  become: true
+  shell: curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
+  when: rexray_file.stat.exists == False or reinstall_rexray == True
+  register: rexray_installed
+
+- name: Make /etc/rexray directory
+  become: true
+  file:
+    path: /etc/rexray
+    state: directory
+    mode: 0755
+
+- name: Copy /etc/rexray/config.yml
+  become: true
+  copy:
+    src: rexray_config.yml
+    dest: /etc/rexray/config.yml
+  register: rexray_config
+
+- name: Restart if nedeed
+  become: true
+  systemd:
+    name: rexray
+    state: restarted
+  when: (rexray_config | changed) or (rexray_installed | changed)
+
+- name: Allways ensure that started
+  become: true
+  systemd:
+    name: rexray
+    state: started

@@ -1,0 +1,13 @@
+- hosts: all
+  gather_facts: False
+  roles:
+    - { role: coreos-bootstrap, bootstrap_type: 'vagrant' }
+    # - { role: rancheros-bootstrap, console: 'ubuntu' }
+    # - { role: docker-engine-bootstrap, engine_version: 'docker-17.05.0-ce' }
+
+- hosts: all
+  roles:
+    - docker-tuning
+    - { role: rexray, reinstall_rexray: False }
+
+- include: swarm.yml

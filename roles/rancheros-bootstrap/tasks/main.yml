@@ -1,0 +1,37 @@
+---
+- name: Check is {{console}} console
+  become: true
+  raw: (ros console list | grep 'current  {{console}}' > /dev/null)
+  ignore_errors: True
+  changed_when: false
+  register: check_console
+
+- name: Enabling {{console}} console
+  local_action: shell ssh -i {{ansible_ssh_private_key_file}} -o StrictHostKeyChecking=no {{ansible_user}}@{{ansible_host}} 'sudo /bin/ros console switch {{console}} -f'; sleep 3
+  ignore_errors: True
+  when: check_console.rc == 1
+
+- name: Ensure that now is {{console}} console
+  retries: 3
+  become: true
+  raw: (ros console list | grep 'current  {{console}}' > /dev/null)
+  changed_when: false
+  when: check_console | failed
+
+- meta: clear_host_errors
+
+- name: Check is Python installed
+  raw: python --version
+  changed_when: false
+  ignore_errors: True
+  register: check_python
+
+- name: Install Python
+  become: true
+  raw: apt-get update && apt-get install python -y
+  when: check_python | failed
+
+- name: Ensure that Python installed and we can use Ansible
+  command: python --version
+  changed_when: false
+  when: check_python | failed
