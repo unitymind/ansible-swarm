@@ -15,7 +15,7 @@
   tags:
     - rexray
 
-- name: Make /etc/rexray directory
+- name: Ensure that /etc/rexray exists
   become: true
   file:
     path: /etc/rexray

@@ -1,9 +1,57 @@
 ---
-- name: Add manager hosts as insecure registries and registry mirrors
+- name: Ensure that /etc/nginx/conf.d
+  become: true
+  file:
+    path: /etc/nginx/conf.d
+    state: directory
+    mode: 0755
+  tags:
+    - docker
+
+- name: Build /etc/nginx/conf.d/docker-registry-mirror.conf from template
+  become: true
+  template:
+    src: docker-registry-mirror.j2.nginx
+    dest: /etc/nginx/conf.d/docker-registry-mirror.conf
+    mode: 0640
+  register: docker_registry_nginx_conf
+  tags:
+    - docker
+
+- name: Copy /etc/systemd/system/docker-registry-mirror.service
+  become: true
+  copy:
+    src: docker-registry-mirror.service
+    dest: /etc/systemd/system/docker-registry-mirror.service
+    mode: 0640
+  register: docker_registry_mirror_service
+  tags:
+    - docker
+
+- name: Restart if service changed
+  become: true
+  systemd:
+    name: docker-registry-mirror
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  when: (docker_registry_nginx_conf | changed) or (docker_registry_mirror_service | changed)
+  tags:
+    - docker
+
+- name: Ensure that started
+  become: true
+  systemd:
+    name: docker-registry-mirror
+    state: started
+  tags:
+    - docker
+
+- name: Add local registry mirror
   become: true
   lineinfile:
     dest: /etc/default/docker
-    regexp: '^DOCKER_OPTS="(.*)\s?(--insecure-registry=.*)?"$'
-    line: DOCKER_OPTS="\1{% for host in groups['manager'] %} --insecure-registry={{ hostvars[host]['ansible_' + iface]['ipv4']['address'] }}:5000 --registry-mirror=http://{{ hostvars[host]['ansible_' + iface]['ipv4']['address'] }}:5000{% endfor %}"
+    regexp: '^DOCKER_OPTS="(.*)(--registry-mirror=.*)?"$'
+    line: DOCKER_OPTS="\1 --registry-mirror http://127.0.0.1:5000"
     backrefs: yes
   notify: Reload

@@ -1,0 +1,19 @@
+[Unit]
+Description=Docker Local Registry Mirror via Proxy
+After=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill registry-mirror
+ExecStartPre=-/usr/bin/docker rm registry-mirror
+ExecStartPre=/usr/bin/docker pull nginx:stable
+ExecStart=/usr/bin/docker run --name registry-mirror \
+  -v /etc/nginx/conf.d/docker-registry-mirror.conf:/etc/nginx/conf.d/docker-registry-mirror.conf \
+  -p 127.0.0.1:5000:80 \
+  nginx:stable
+
+ExecStop=-/usr/bin/docker stop registry-mirror
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
