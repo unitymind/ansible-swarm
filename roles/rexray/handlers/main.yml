@@ -1,0 +1,6 @@
+---
+- name: Restart
+  become: true
+  systemd:
+    name: docker
+    state: restarted

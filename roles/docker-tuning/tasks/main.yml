@@ -1,6 +1,9 @@
 ---
 - name: Check --expiremental
-  script: check-experimental.sh
+  shell: >
+      {% raw -%}
+        docker version -f '{{.Server.Experimental}}'
+      {%- endraw %}
   changed_when: False
   register: check_expiremental
 
@@ -10,19 +13,11 @@
     path: /etc/systemd/system/docker.service.d
     state: directory
     mode: 0755
-  when: check_expiremental.stdout_lines[0] == 'false'
+  when: "'false' in check_expiremental.stdout"
 
 - name: Copy /etc/systemd/system/docker.service.d/10-experimental.conf
   become: true
   copy:
     src: docker.service.d/10-experimental.conf
     dest: /etc/systemd/system/docker.service.d/10-experimental.conf
-  when: check_expiremental.stdout_lines[0] == 'false'
-
-- name: Reload Docker service
-  become: true
-  systemd:
-    name: docker
-    state: restarted
-    daemon_reload: yes
-  when: check_expiremental.stdout_lines[0] == 'false'
+  notify: Reload

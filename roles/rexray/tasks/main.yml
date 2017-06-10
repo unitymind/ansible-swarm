@@ -1,14 +1,15 @@
 ---
-- name: Check if Rexray installed
+- name: Check is installed
   stat:
     path: /opt/bin/rexray
   register: rexray_file
 
-- name: Install Rexray
+- name: Install
   become: true
-  shell: curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
+  shell: >
+    curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
   when: rexray_file.stat.exists == False or rexray.reinstall == True
-  register: rexray_installed
+  notify: Restart
 
 - name: Make /etc/rexray directory
   become: true
@@ -17,30 +18,23 @@
     state: directory
     mode: 0755
 
-- name: Generate /etc/rexray/config.yml for Virtualbox
+- name: Generate config for Virtualbox
   become: true
   template:
     src: rexray_config_virtualbox.j2.yml
     dest: /etc/rexray/config.yml
     mode: 0600
-  register: rexray_config
   when: rexray.storage_type == "virtualbox"
+  notify: Restart
 
-- name: Generate /etc/rexray/config.yml for DigitalOcean
+- name: Generate config for DigitalOcean
   become: true
   template:
     src: rexray_config_digitalocean.j2.yml
     dest: /etc/rexray/config.yml
     mode: 0600
-  register: rexray_config
   when: rexray.storage_type == "digitalocean"
-
-- name: Restart if nedeed
-  become: true
-  systemd:
-    name: rexray
-    state: restarted
-  when: (rexray_config | changed) or (rexray_installed | changed)
+  notify: Restart
 
 - name: Allways ensure that started
   become: true

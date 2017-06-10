@@ -1,9 +1,6 @@
 - hosts: all
-  gather_facts: False
+  gather_facts: false
   roles:
     - coreos-bootstrap
-
-- hosts: all
-  roles:
     - docker-tuning
     - rexray
