@@ -1,32 +1,42 @@
 ---
 - block:
-  - name: Check /var/bash-completion/bash_completion
+  - name: Check is bash-completion installed
     become: true
     stat:
       path: /var/bash-completion/bash_completion
     register: bash_completion
 
-  - name: Install bash completion
+  - name: Install bash-completion
     become: true
     shell: >
       toolbox dnf -y install bash-completion wget \
-      && toolbox cp /usr/share/bash-completion /media/root/var/ -R  \
-      && source /var/bash-completion/bash_completion \
-      && cp $(readlink .bashrc) .bashrc.new && mv .bashrc.new .bashrc \
-      && echo "source /var/bash-completion/bash_completion" >> ~/.bashrc
+      && toolbox cp /usr/share/bash-completion /media/root/var/ -R
     when:
       - bash_completion.stat.exists == False
 
   - block:
-    - name: Check Docker
+    - name: Check is Docker completion installed
       become: true
       stat:
         path: /var/bash-completion/completions/docker
       register: docker_completion
-    - name: Docker
+    - name: Install Docker completion
       become: true
       shell: >
         toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
       when: docker_completion.stat.exists == False
     when: completions.docker == True
+
+  - name: "Stat $HOME/.bashrc"
+    stat:
+      path: $HOME/.bashrc
+    register: bashrc
+  - name: Unlink .bashrc
+    shell: >
+      cp $(readlink .bashrc) .bashrc.new && mv .bashrc.new .bashrc
+    when: bashrc.stat.islnk is defined and bashrc.stat.islnk
+  - name: Source /var/bash-completion/bash_completion
+    lineinfile:
+      path: $HOME/.bashrc
+      line: 'source /var/bash-completion/bash_completion'
   when: completions.install == True

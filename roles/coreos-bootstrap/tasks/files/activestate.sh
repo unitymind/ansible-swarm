@@ -18,3 +18,5 @@ ln -sf /opt/python/bin/pip /opt/bin/pip
 ln -sf /opt/python/bin/python /opt/bin/python
 ln -sf /opt/python/bin/python /opt/bin/python2
 ln -sf /opt/python/bin/virtualenv /opt/bin/virtualenv
+
+touch $HOME/.bootstrapped

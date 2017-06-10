@@ -1,0 +1,25 @@
+---
+- block:
+  - name: Add any insecure registries
+    become: true
+    lineinfile:
+      dest: /etc/default/docker
+      regexp: ^DOCKER_OPTS="(.*)"$
+      line: DOCKER_OPTS="\1 --experimental"
+      backrefs: yes
+    notify: Reload
+    when: docker.experimental == True
+    tags:
+      - docker
+
+  - name: Disable --experimental
+    become: true
+    lineinfile:
+      dest: /etc/default/docker
+      line: 'DOCKER_OPTS=--experimental'
+      state: absent
+    notify: Reload
+    when: docker.experimental == False
+    tags:
+      - docker
+  when: docker.experimental is defined

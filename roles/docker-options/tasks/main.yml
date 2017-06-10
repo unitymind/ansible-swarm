@@ -1,0 +1,57 @@
+---
+- block:
+  - name: Purge DOCKER_OPTS
+    become: true
+    lineinfile:
+      dest: /etc/default/docker
+      regexp: '^DOCKER_OPTS=".*"$'
+      line: DOCKER_OPTS=""
+    notify: Reload
+    when: docker.options.purge is defined and docker.options.purge == True
+    tags:
+      - docker
+
+  - block:
+    - name: Check experimental status
+      shell: >
+        {% raw -%}
+          docker version -f '{{.Server.Experimental}}'
+        {% endraw -%}
+      register: docker_experimental
+      tags:
+        - docker
+
+    - name: Enable --experimental
+      become: true
+      lineinfile:
+        dest: /etc/default/docker
+        regexp: '^DOCKER_OPTS="(.*)"$'
+        line: DOCKER_OPTS="\1 --experimental"
+        backrefs: yes
+      notify: Reload
+      when: docker.options.experimental == True and docker_experimental.stdout != 'true'
+      tags:
+        - docker
+
+    - name: Disable --experimental
+      become: true
+      lineinfile:
+        dest: /etc/default/docker
+        regexp: ^DOCKER_OPTS="(.*)(--experimental)(.*)"$
+        line: 'DOCKER_OPTS="\1\3"'
+        backrefs: yes
+      notify: Reload
+      when: docker.options.experimental == False and docker_experimental.stdout != 'false'
+      tags:
+        - docker
+    when: docker.options.experimental is defined
+  - name: Strip leading spaces
+    become: true
+    lineinfile:
+      dest: /etc/default/docker
+      regexp: '^DOCKER_OPTS="(\s*)(.*)"$'
+      line: 'DOCKER_OPTS="\2"'
+      backrefs: yes
+    tags:
+      - docker
+  when: docker.options is defined

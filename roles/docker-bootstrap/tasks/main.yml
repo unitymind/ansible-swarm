@@ -1,28 +1,47 @@
 ---
-- block:
-  - name: Check --expiremental
-    shell: >
-        {% raw -%}
-          docker version -f '{{.Server.Experimental}}'
-        {%- endraw %}
-    changed_when: False
-    register: check_expiremental
+- name: Ensure that drop-ins path exists
+  become: true
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+  tags:
+    - docker
 
-  - name: Ensure that drop-ins path exists
-    become: true
-    file:
-      path: /etc/systemd/system/docker.service.d
-      state: directory
-      mode: 0755
-    when: "check_expiremental.stdout == 'false'"
+- name: Copy /etc/systemd/system/docker.service.d/10-environment-file.conf
+  become: true
+  copy:
+    src: docker.service.d/10-environment-file.conf
+    dest: /etc/systemd/system/docker.service.d/10-environment-file.conf
+  notify: Reload
+  tags:
+    - docker
 
-  - name: Copy /etc/systemd/system/docker.service.d/10-experimental.conf
-    become: true
-    copy:
-      src: docker.service.d/10-experimental.conf
-      dest: /etc/systemd/system/docker.service.d/10-experimental.conf
-    when: "check_expiremental.stdout == 'false'"
-    notify: Reload
+- name: Check /etc/default/docker
+  become: true
+  stat:
+    path: /etc/default/docker
+  register: default_docker
+  tags:
+    - docker
+    
+- name: Touch that /etc/default/docker
+  become: true
+  file:
+    path: /etc/default/docker
+    state: touch
+    mode: 0755
+  when: default_docker.stat.exists == False
+  tags:
+    - docker
 
-  when:
-    - docker.experimental == True
+- name: Insert empty DOCKER_OPTS
+  become: true
+  lineinfile:
+    dest: /etc/default/docker
+    line: 'DOCKER_OPTS=""'
+    state: present
+  notify: Reload
+  when: default_docker.stat.exists == False
+  tags:
+    - docker
