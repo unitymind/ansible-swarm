@@ -5,11 +5,6 @@
   changed_when: False
   ignore_errors: True
 
-- debug:
-    msg: This action take a somewhile. Please be patient and don't worry :)
-  when:
-    - need_bootstrap | failed
-
 - name: Run bootstrap-miniconda.sh
   script: bootstrap-miniconda.sh
   when:

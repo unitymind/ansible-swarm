@@ -1,23 +1,49 @@
 ---
-- name: Check --expiremental
-  shell: >
-      {% raw -%}
-        docker version -f '{{.Server.Experimental}}'
-      {%- endraw %}
-  changed_when: False
-  register: check_expiremental
+- block:
+  - name: Check --expiremental
+    shell: >
+        {% raw -%}
+          docker version -f '{{.Server.Experimental}}'
+        {%- endraw %}
+    changed_when: False
+    register: check_expiremental
 
-- name: Ensure that drop-ins path exists
-  become: true
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
-    mode: 0755
-  when: "'false' in check_expiremental.stdout"
+  - name: Ensure that drop-ins path exists
+    become: true
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+      mode: 0755
+    when: "check_expiremental.stdout == 'false'"
 
-- name: Copy /etc/systemd/system/docker.service.d/10-experimental.conf
-  become: true
-  copy:
-    src: docker.service.d/10-experimental.conf
-    dest: /etc/systemd/system/docker.service.d/10-experimental.conf
-  notify: Reload
+  - name: Copy /etc/systemd/system/docker.service.d/10-experimental.conf
+    become: true
+    copy:
+      src: docker.service.d/10-experimental.conf
+      dest: /etc/systemd/system/docker.service.d/10-experimental.conf
+    when: "check_expiremental.stdout == 'false'"
+    notify: Reload
+
+  when:
+    - docker.experimental == True
+
+- block:
+  - name: Check /var/bash-completion/bash_completion
+    become: true
+    stat:
+      path: /var/bash-completion/bash_completion
+    register: bash_completion
+
+  - name: Install Docker Bash completion
+    become: true
+    shell: >
+      toolbox dnf -y install bash-completion wget \
+      && toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /usr/share/bash-completion/completions/docker \
+      && toolbox cp /usr/share/bash-completion /media/root/var/ -R  \
+      && source /var/bash-completion/bash_completion \
+      && cp $(readlink .bashrc) .bashrc.new && mv .bashrc.new .bashrc \
+      && echo "source /var/bash-completion/bash_completion" >> ~/.bashrc
+    when:
+      - bash_completion.stat.exists == False
+  when:
+    - docker.completion == True
