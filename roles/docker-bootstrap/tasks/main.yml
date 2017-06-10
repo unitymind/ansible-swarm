@@ -24,24 +24,24 @@
   register: default_docker
   tags:
     - docker
-    
-- name: Touch that /etc/default/docker
-  become: true
-  file:
-    path: /etc/default/docker
-    state: touch
-    mode: 0755
-  when: default_docker.stat.exists == False
-  tags:
-    - docker
 
-- name: Insert empty DOCKER_OPTS
-  become: true
-  lineinfile:
-    dest: /etc/default/docker
-    line: 'DOCKER_OPTS=""'
-    state: present
-  notify: Reload
+- block:
+  - name: Touch that /etc/default/docker
+    become: true
+    file:
+      path: /etc/default/docker
+      state: touch
+      mode: 0755
+    tags:
+      - docker
+
+  - name: Initial empty DOCKER_OPTS
+    become: true
+    lineinfile:
+      dest: /etc/default/docker
+      line: 'DOCKER_OPTS=""'
+      state: present
+    notify: Reload
+    tags:
+      - docker
   when: default_docker.stat.exists == False
-  tags:
-    - docker

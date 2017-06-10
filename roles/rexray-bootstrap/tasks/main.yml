@@ -3,6 +3,8 @@
   stat:
     path: /opt/bin/rexray
   register: rexray_file
+  tags:
+    - rexray
 
 - name: Install
   become: true
@@ -10,6 +12,8 @@
     curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
   when: rexray_file.stat.exists == False or rexray.reinstall == True
   notify: Restart
+  tags:
+    - rexray
 
 - name: Make /etc/rexray directory
   become: true
@@ -17,6 +21,8 @@
     path: /etc/rexray
     state: directory
     mode: 0755
+  tags:
+    - rexray
 
 - name: Generate config for Virtualbox
   become: true
@@ -26,6 +32,8 @@
     mode: 0600
   when: rexray.storage_type == "virtualbox"
   notify: Restart
+  tags:
+    - rexray
 
 - name: Generate config for DigitalOcean
   become: true
@@ -35,9 +43,13 @@
     mode: 0600
   when: rexray.storage_type == "digitalocean"
   notify: Restart
+  tags:
+    - rexray
 
 - name: Ensure that started
   become: true
   systemd:
     name: rexray
     state: started
+  tags:
+    - rexray
