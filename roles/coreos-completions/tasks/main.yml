@@ -5,6 +5,9 @@
     stat:
       path: /var/bash-completion/bash_completion
     register: bash_completion
+    tags:
+      - development
+      - tools
 
   - name: Install bash-completion
     become: true
@@ -13,6 +16,9 @@
       && toolbox cp /usr/share/bash-completion /media/root/var/ -R
     when:
       - bash_completion.stat.exists == False
+    tags:
+      - development
+      - tools
 
   - block:
     - name: Check is Docker completion installed
@@ -20,23 +26,38 @@
       stat:
         path: /var/bash-completion/completions/docker
       register: docker_completion
+      tags:
+        - development
+        - tools
     - name: Install Docker completion
       become: true
       shell: >
         toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
       when: docker_completion.stat.exists == False
+      tags:
+        - development
+        - tools
     when: completions.docker == True
 
   - name: "Stat $HOME/.bashrc"
     stat:
       path: $HOME/.bashrc
     register: bashrc
+    tags:
+      - development
+      - tools
   - name: Unlink .bashrc
     shell: >
       cp $(readlink .bashrc) .bashrc.new && mv .bashrc.new .bashrc
     when: bashrc.stat.islnk is defined and bashrc.stat.islnk
+    tags:
+      - development
+      - tools
   - name: Source /var/bash-completion/bash_completion
     lineinfile:
       path: $HOME/.bashrc
       line: 'source /var/bash-completion/bash_completion'
+    tags:
+      - development
+      - tools
   when: completions.install == True
