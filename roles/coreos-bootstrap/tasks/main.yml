@@ -10,8 +10,8 @@
   when:
     - need_bootstrap | failed
 
-- name: Run bootstrap-anaconda.sh
-  script: bootstrap-anaconda.sh
+- name: Run bootstrap-miniconda.sh
+  script: bootstrap-miniconda.sh
   when:
     - need_bootstrap | failed
     - bootstrap_type == "remote"
