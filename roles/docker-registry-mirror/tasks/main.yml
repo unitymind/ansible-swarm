@@ -7,7 +7,7 @@
     mode: 0755
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
 
 - name: Build /etc/nginx/conf.d/docker-registry-mirror.conf from template
   become: true
@@ -18,7 +18,7 @@
   register: docker_registry_nginx_conf
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
 
 - name: Copy /etc/systemd/system/docker-registry-mirror.service
   become: true
@@ -29,7 +29,7 @@
   register: docker_registry_mirror_service
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
 
 - name: Restart if service changed
   become: true
@@ -41,7 +41,7 @@
   when: (docker_registry_nginx_conf | changed) or (docker_registry_mirror_service | changed)
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
 
 - name: Ensure that started
   become: true
@@ -50,16 +50,16 @@
     state: started
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
 
 - name: Add local registry mirror
   become: true
   lineinfile:
     dest: /etc/default/docker
-    regexp: '^DOCKER_OPTS="(.*)(--registry-mirror=.*)?"$'
-    line: DOCKER_OPTS="\1 --registry-mirror http://127.0.0.1:5000"
+    regexp: '^DOCKER_OPTS="(.+)(--registry-mirror=.+)?"$'
+    line: DOCKER_OPTS="\1 --registry-mirror=http://127.0.0.1:5000"
     backrefs: yes
-  notify: Reload
+  notify: Reload Docker
   tags:
     - docker
-    - docker-registry-mirror
+    - docker_registry_mirror
