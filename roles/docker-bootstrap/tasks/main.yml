@@ -1,0 +1,28 @@
+---
+- block:
+  - name: Check --expiremental
+    shell: >
+        {% raw -%}
+          docker version -f '{{.Server.Experimental}}'
+        {%- endraw %}
+    changed_when: False
+    register: check_expiremental
+
+  - name: Ensure that drop-ins path exists
+    become: true
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+      mode: 0755
+    when: "check_expiremental.stdout == 'false'"
+
+  - name: Copy /etc/systemd/system/docker.service.d/10-experimental.conf
+    become: true
+    copy:
+      src: docker.service.d/10-experimental.conf
+      dest: /etc/systemd/system/docker.service.d/10-experimental.conf
+    when: "check_expiremental.stdout == 'false'"
+    notify: Reload
+
+  when:
+    - docker.experimental == True
