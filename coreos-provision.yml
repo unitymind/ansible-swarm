@@ -4,5 +4,5 @@
     - coreos-bootstrap
     - docker-bootstrap
     - rexray-bootstrap
-    - coreos-completions
     - docker-options
+    - coreos-completions

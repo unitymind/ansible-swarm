@@ -26,7 +26,7 @@
     - docker
 
 - block:
-  - name: Touch that /etc/default/docker
+  - name: Touch /etc/default/docker
     become: true
     file:
       path: /etc/default/docker

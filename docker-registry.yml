@@ -1,0 +1,7 @@
+- hosts: manager
+  roles:
+    - docker-registry
+
+# - hosts: worker
+#   roles:
+#     - docker-registry-mirror

@@ -1,25 +1,29 @@
 ---
-- block:
-  - name: Add any insecure registries
-    become: true
-    lineinfile:
-      dest: /etc/default/docker
-      regexp: ^DOCKER_OPTS="(.*)"$
-      line: DOCKER_OPTS="\1 --experimental"
-      backrefs: yes
-    notify: Reload
-    when: docker.experimental == True
-    tags:
-      - docker
+- name: Build /etc/systemd/system/docker-registry.service from template
+  become: true
+  template:
+    src: docker-registry.j2.service
+    dest: /etc/systemd/system/docker-registry.service
+    mode: 0640
+  register: docker_registry_service
+  tags:
+    - docker
 
-  - name: Disable --experimental
-    become: true
-    lineinfile:
-      dest: /etc/default/docker
-      line: 'DOCKER_OPTS=--experimental'
-      state: absent
-    notify: Reload
-    when: docker.experimental == False
-    tags:
-      - docker
-  when: docker.experimental is defined
+- name: Restart if service changed
+  become: true
+  systemd:
+    name: docker-registry
+    daemon_reload: yes
+    enabled: yes
+    state: restarted
+  when: docker_registry_service | changed
+  tags:
+    - docker
+
+- name: Ensure that started
+  become: true
+  systemd:
+    name: docker-registry
+    state: started
+  tags:
+    - docker
