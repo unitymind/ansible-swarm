@@ -8,6 +8,7 @@
   register: docker_registry_service
   tags:
     - docker
+    - docker-registry
 
 - name: Restart if service changed
   become: true
@@ -19,6 +20,7 @@
   when: docker_registry_service | changed
   tags:
     - docker
+    - docker-registry
 
 - name: Ensure that started
   become: true
@@ -27,3 +29,4 @@
     state: started
   tags:
     - docker
+    - docker-registry

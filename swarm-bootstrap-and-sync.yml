@@ -3,6 +3,9 @@
 #   - swarm_manager_operational (swarm is running and active)
 #   - swarm_manager_bootstrap (host needs to be joined to the cluster)
 - hosts: manager
+  tags:
+    - docker
+    - swarm
   become: true
   tasks:
     - name: determine swarm status
@@ -32,6 +35,9 @@
 # #   - swarm_worker_operational (host is joined to the swarm cluster)
 # #   - swarm_worker_bootstrap (host needs to be joined to the cluster)
 - hosts: worker
+  tags:
+    - docker
+    - swarm
   become: true
   tasks:
     - name: determine swarm status
@@ -60,6 +66,9 @@
 # # are no hosts running swarm, we need to initialize one of the hosts
 # # then add it to the swarm_manager_operational group
 - hosts: swarm_manager_bootstrap[0]
+  tags:
+    - docker
+    - swarm
   become: true
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
@@ -82,6 +91,9 @@
 # # retrieve the swarm tokens and populate a list of ips listening on
 # # the swarm port 2377
 - hosts: swarm_manager_operational[0]
+  tags:
+    - docker
+    - swarm
   become: true
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
@@ -102,6 +114,9 @@
 
 # # join the manager hosts not yet initialized to the swarm cluster
 - hosts: swarm_manager_bootstrap:!swarm_manager_operational
+  tags:
+    - docker
+    - swarm
   become: true
   vars:
     token: "{{ hostvars[groups['swarm_manager_operational'][0]]['swarm_manager_token']['stdout'] }}"
@@ -117,6 +132,9 @@
 #
 # # join the worker hosts not yet initialized to the swarm cluster
 - hosts: swarm_worker_bootstrap
+  tags:
+    - docker
+    - swarm
   become: true
   vars:
     token: "{{ hostvars[groups['swarm_manager_operational'][0]]['swarm_worker_token']['stdout'] }}"
