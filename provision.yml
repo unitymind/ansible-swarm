@@ -1,0 +1,9 @@
+- include: bootstrap.yml
+- include: docker-registry.yml
+
+- hosts: all
+  gather_facts: false
+  roles:
+    - coreos-completions
+
+- include: swarm-bootstrap-and-sync.yml
