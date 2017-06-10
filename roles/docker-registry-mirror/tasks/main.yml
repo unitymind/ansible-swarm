@@ -1,0 +1,8 @@
+---
+- name: Add manager hosts as insecure registries and registry mirrors
+  become: true
+  lineinfile:
+    dest: /etc/default/docker
+    regexp: ^DOCKER_OPTS="\$DOCKER_OPTS --insecure-registry=.*"$
+    line: DOCKER_OPTS="$DOCKER_OPTS {% for host in groups['manager'] %} --insecure-registry={{ hostvars[host]['ansible_' + iface]['ipv4']['address'] }}:5000 --registry-mirror=https://{{ hostvars[host]['ansible_' + iface]['ipv4']['address'] }}:5000{% endfor %}"
+  notify: Reload
