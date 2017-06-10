@@ -62,7 +62,7 @@
 - hosts: swarm_manager_bootstrap[0]
   become: true
   vars:
-    iface: "{{ swarm_iface | default('eth0') }}"
+    iface: "{{ swarm.iface | default('eth0') }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
   tasks:
     - name: initialize swarm cluster
@@ -84,7 +84,7 @@
 - hosts: swarm_manager_operational[0]
   become: true
   vars:
-    iface: "{{ swarm_iface | default('eth0') }}"
+    iface: "{{ swarm.iface | default('eth0') }}"
   tasks:
     - name: retrieve swarm manager token
       shell: docker swarm join-token -q manager
@@ -105,7 +105,7 @@
   become: true
   vars:
     token: "{{ hostvars[groups['swarm_manager_operational'][0]]['swarm_manager_token']['stdout'] }}"
-    iface: "{{ swarm_iface | default('eth0') }}"
+    iface: "{{ swarm.iface | default('eth0') }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
   tasks:
     - name: join manager nodes to cluster
@@ -120,7 +120,7 @@
   become: true
   vars:
     token: "{{ hostvars[groups['swarm_manager_operational'][0]]['swarm_worker_token']['stdout'] }}"
-    iface: "{{ swarm_iface | default('eth0') }}"
+    iface: "{{ swarm.iface | default('eth0') }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
   tasks:
     - name: join worker nodes to cluster

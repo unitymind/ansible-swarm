@@ -3,7 +3,5 @@
     - docker-registry
 
 - hosts: worker
-  vars:
-    iface: "{{ docker_registry_iface | default('eth0') }}"
   roles:
     - docker-registry-mirror
