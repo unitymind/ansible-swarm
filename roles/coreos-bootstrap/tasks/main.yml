@@ -1,9 +1,9 @@
 ---
-- name: Check if bootstrap is needed
+- name: Check is bootstrapped
   raw: stat /home/core/.bootstrapped
   register: need_bootstrap
-  changed_when: False
-  ignore_errors: True
+  changed_when: false
+  ignore_errors: true
 
 - name: Run bootstrap-miniconda.sh
   script: bootstrap-miniconda.sh

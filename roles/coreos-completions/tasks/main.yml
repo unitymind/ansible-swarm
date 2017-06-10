@@ -6,7 +6,7 @@
       path: /var/bash-completion/bash_completion
     register: bash_completion
 
-  - name: Install bash-completion
+  - name: Install bash completion
     become: true
     shell: >
       toolbox dnf -y install bash-completion wget \
@@ -17,9 +17,16 @@
     when:
       - bash_completion.stat.exists == False
 
-  - name: Docker
-    become: true
-    shell: >
-      toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /usr/share/bash-completion/completions/docker
+  - block:
+    - name: Check Docker
+      become: true
+      stat:
+        path: /var/bash-completion/completions/docker
+      register: docker_completion
+    - name: Docker
+      become: true
+      shell: >
+        toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
+      when: docker_completion.stat.exists == False
     when: completions.docker == True
   when: completions.install == True

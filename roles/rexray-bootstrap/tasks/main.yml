@@ -36,7 +36,7 @@
   when: rexray.storage_type == "digitalocean"
   notify: Restart
 
-- name: Allways ensure that started
+- name: Ensure that started
   become: true
   systemd:
     name: rexray
