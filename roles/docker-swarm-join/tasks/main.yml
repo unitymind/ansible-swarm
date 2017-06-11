@@ -13,4 +13,3 @@
     --advertise-addr={{ advertise_addr }}:2377
     --token={{ token }}
     {{ join_addr }}:2377
-  when: groups['swarm_bootstrap'] is defined and (inventory_hostname in groups['swarm_bootstrap'])

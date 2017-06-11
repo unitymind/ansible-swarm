@@ -2,9 +2,11 @@
 - name: retrieve swarm manager token
   shell: docker swarm join-token -q manager
   register: swarm_manager_token
+  changed_when: false
   run_once: true
 
 - name: retrieve swarm worker token
   shell: docker swarm join-token -q worker
   register: swarm_worker_token
+  changed_when: false
   run_once: true

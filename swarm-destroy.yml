@@ -1,7 +1,15 @@
 - hosts: all
   gather_facts: false
-  become: true
-  tasks:
-    - name: Forced leave node from a swarm
-      shell: docker swarm leave --force
-      ignore_errors: true
+  roles:
+    - role: docker-swarm-grouping
+      tags:
+        - docker
+        - swarm
+    - role: docker-swarm-leave
+      when: >
+        (groups['swarm_operational'] is defined)
+        and
+        (inventory_hostname in groups['swarm_operational'])
+      tags:
+        - docker
+        - swarm

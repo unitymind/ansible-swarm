@@ -1,6 +1,0 @@
-- hosts: all
-  roles:
-    - { role: docker-swarm-grouping, tags: ['docker', 'swarm'] }
-    - { role: docker-swarm-init, when: "'swarm_manager_operational' not in groups", tags: ['docker', 'swarm'] }
-    - { role: docker-swarm-retrieve-tokens, when: "'swarm_manager_operational' in groups", tags: ['docker', 'swarm'] }
-    - { role: docker-swarm-join, tags: ['docker'] }

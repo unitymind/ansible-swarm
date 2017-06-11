@@ -12,6 +12,6 @@
 - name: add initialized host to swarm_manager_operational group
   add_host:
     hostname: "{{ inventory_hostname }}"
-    groups: swarm_manager_operational
+    groups: swarm_manager_operational, swarm_operational
   when: init_first_node | changed
   run_once: true

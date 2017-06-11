@@ -1,0 +1,30 @@
+- hosts: all
+  roles:
+    - role: docker-swarm-grouping
+      tags: ['docker', 'swarm']
+    - role: docker-swarm-init
+      when: >
+        'swarm_manager_operational' not in groups
+      tags:
+        - docker
+        - swarm
+    - role: docker-swarm-retrieve-tokens
+      when: >
+        'swarm_manager_operational' in groups
+      tags:
+        - docker
+        - swarm
+    - role: docker-swarm-join
+      when: >
+        (groups['swarm_bootstrap'] is defined)
+        and
+        (groups['swarm_operational'] is defined)
+        and
+        (groups['swarm_manager_operational'] is defined)
+        and
+        (inventory_hostname in groups['swarm_bootstrap'])
+        and
+        (inventory_hostname not in groups['swarm_operational'])
+      tags:
+        - docker
+        - swarm
