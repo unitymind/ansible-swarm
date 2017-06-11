@@ -29,14 +29,31 @@ EXAMPLES = """
 """
 
 
-from ansible.module_utils.docker_common import AnsibleDockerClient
+from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseClass
 
 
-def _get_docker_info(client):
-    try:
-        return client.info(), False
-    except Exception as e:
-        return {}, e.message
+class InfoManager(DockerBaseClass):
+
+    def __init__(self, client, results):
+
+        super(InfoManager, self).__init__()
+
+        self.client = client
+        self.results = results
+        self.check_mode = self.client.check_mode
+
+        self.execute()
+
+    def execute(self):
+        try:
+            self.results['changed'] = True
+            if not self.check_mode:
+                self.results['ansible_facts'] = {'docker_info': self.client.info()}
+        except Exception as e:
+            self.fail(e.message)
+
+    def fail(self, msg):
+        self.client.fail(msg)
 
 
 def main():
@@ -44,18 +61,16 @@ def main():
 
     client = AnsibleDockerClient(
         argument_spec=argument_spec,
-        supports_check_mode=False
+        supports_check_mode=True
     )
 
-    info, err = _get_docker_info(client)
-
-    if err:
-        client.module.fail_json(msg=err)
-
-    client.module.exit_json(
-        changed=True,
-        ansible_facts={'docker_info': info}
+    results = dict(
+        changed=False,
+        ansible_facts={}
     )
+
+    InfoManager(client, results)
+    client.module.exit_json(**results)
 
 if __name__ == '__main__':
     main()
