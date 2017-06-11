@@ -4,6 +4,7 @@
     - role: coreos-bootstrap
       tags:
         - bootstrap
+        - coreos
     - role: docker-bootstrap
       tags:
         - bootstrap
