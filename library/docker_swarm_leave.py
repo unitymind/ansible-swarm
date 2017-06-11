@@ -28,7 +28,7 @@ options:
       - Leave the swarm even if this node is a manager.
     required: False
     default: False
-    
+
 extends_documentation_fragment:
     - docker
 requirements:
@@ -40,7 +40,7 @@ requirements:
 EXAMPLES = """
 - name: Leave node from a cluster
   docker_swarm_leave:
-  
+
 - name: Force leave node from a cluster
   docker_swarm_leave:
     force: True
@@ -48,7 +48,7 @@ EXAMPLES = """
 
 
 from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseClass
-
+from docker.errors import APIError
 
 class SwarmLeaveManager(DockerBaseClass):
 
@@ -67,10 +67,11 @@ class SwarmLeaveManager(DockerBaseClass):
 
     def execute(self):
         try:
-            if self.client.swarm.leave(self.force):
-                self.results['changed'] = True
+            self.results['changed'] = self.client.leave_swarm(self.force)
+        except APIError as e:
+            self.fail(str(e))
         except Exception as e:
-            self.fail(e.message)
+            self.fail(str(e))
 
     def fail(self, msg):
         self.client.fail(msg)

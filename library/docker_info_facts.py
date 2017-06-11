@@ -30,7 +30,7 @@ EXAMPLES = """
 
 
 from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseClass
-
+from docker.errors import APIError
 
 class InfoManager(DockerBaseClass):
 
@@ -50,8 +50,10 @@ class InfoManager(DockerBaseClass):
                 info = self.client.info()
                 self.results['changed'] = True
                 self.results['ansible_facts'] = {'docker_info': info}
+        except APIError as e:
+            self.fail(str(e))
         except Exception as e:
-            self.fail(e.message)
+            self.fail(str(e))
 
     def fail(self, msg):
         self.client.fail(msg)
@@ -66,8 +68,7 @@ def main():
     )
 
     results = dict(
-        changed=False,
-        ansible_facts={}
+        changed=False
     )
 
     InfoManager(client, results)

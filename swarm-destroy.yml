@@ -5,6 +5,7 @@
       tags:
         - docker
         - swarm
+
     - role: docker-swarm-leave
       when: >
         (groups['swarm_operational'] is defined)
