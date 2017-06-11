@@ -6,27 +6,23 @@
     dest: /etc/systemd/system/docker-registry.service
     mode: 0640
   register: docker_registry_service
-  tags:
-    - docker
-    - docker_registry
+
+- name: Enable
+  become: true
+  systemd:
+    name: docker-registry
+    enabled: yes
 
 - name: Restart if service changed
   become: true
   systemd:
     name: docker-registry
     daemon_reload: yes
-    enabled: yes
     state: restarted
   when: docker_registry_service | changed
-  tags:
-    - docker
-    - docker_registry
 
 - name: Ensure that started
   become: true
   systemd:
     name: docker-registry
     state: started
-  tags:
-    - docker
-    - docker_registry

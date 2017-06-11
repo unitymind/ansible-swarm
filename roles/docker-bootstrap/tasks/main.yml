@@ -5,43 +5,25 @@
     path: /etc/systemd/system/docker.service.d
     state: directory
     mode: 0755
-  tags:
-    - docker
 
-- name: Copy /etc/systemd/system/docker.service.d/10-environment-file.conf
+- name: Set DOCKER_OPTS for manager
+  vars:
+    docker_opts: "--experimental"
   become: true
-  copy:
-    src: docker.service.d/10-environment-file.conf
-    dest: /etc/systemd/system/docker.service.d/10-environment-file.conf
-  notify: Reload
-  tags:
-    - docker
+  template:
+    src: 10-docker-opts.j2.conf
+    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
+    mode: 0600
+  notify: Reload Docker
+  when: "'manager' in group_names"
 
-- name: Check /etc/default/docker
+- name: Set DOCKER_OPTS for worker
+  vars:
+    docker_opts: "--experimental --registry-mirror=http://127.0.0.1:5000"
   become: true
-  stat:
-    path: /etc/default/docker
-  register: default_docker
-  tags:
-    - docker
-
-- block:
-  - name: Touch /etc/default/docker
-    become: true
-    file:
-      path: /etc/default/docker
-      state: touch
-      mode: 0755
-    tags:
-      - docker
-
-  - name: Initial empty DOCKER_OPTS
-    become: true
-    lineinfile:
-      dest: /etc/default/docker
-      line: 'DOCKER_OPTS=""'
-      state: present
-    notify: Reload
-    tags:
-      - docker
-  when: default_docker.stat.exists == False
+  template:
+    src: 10-docker-opts.j2.conf
+    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
+    mode: 0600
+  notify: Reload Docker
+  when: "'worker' in group_names"
