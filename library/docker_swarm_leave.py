@@ -31,6 +31,10 @@ options:
     
 extends_documentation_fragment:
     - docker
+requirements:
+    - "python >= 2.7"
+    - "docker >= 2.3.0"
+    - "Docker API >= 1.24"
 """
 
 EXAMPLES = """
