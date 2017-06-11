@@ -1,0 +1,16 @@
+---
+- name: join node to cluster
+  vars:
+    iface: "{{ swarm.iface | default('eth0') }}"
+    manager_inventory_hostname: "{{ groups['swarm_manager_operational'][0] }}"
+    manager_token: "{{ hostvars[manager_inventory_hostname]['swarm_manager_token']['stdout'] }}"
+    worker_token: "{{ hostvars[manager_inventory_hostname]['swarm_worker_token']['stdout'] }}"
+    token: "{{ manager_token if inventory_hostname in groups['swarm_manager_bootstrap'] else worker_token }}"
+    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
+    join_addr: "{{ hostvars[manager_inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
+  shell: >
+    docker swarm join
+    --advertise-addr={{ advertise_addr }}:2377
+    --token={{ token }}
+    {{ join_addr }}:2377
+  when: groups['swarm_bootstrap'] is defined and (inventory_hostname in groups['swarm_bootstrap'])

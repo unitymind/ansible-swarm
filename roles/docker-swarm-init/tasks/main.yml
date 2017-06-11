@@ -6,7 +6,6 @@
   shell: >
     docker swarm init
     --advertise-addr={{ advertise_addr }}:2377
-  when: "'swarm_manager_operational' not in groups"
   register: init_first_node
   run_once: true
 
@@ -15,16 +14,4 @@
     hostname: "{{ inventory_hostname }}"
     groups: swarm_manager_operational
   when: init_first_node | changed
-  run_once: true
-
-- name: retrieve swarm manager token
-  shell: docker swarm join-token -q manager
-  register: swarm_manager_token
-  when: "'swarm_manager_operational' in groups"
-  run_once: true
-
-- name: retrieve swarm worker token
-  shell: docker swarm join-token -q worker
-  register: swarm_worker_token
-  when: "'swarm_manager_operational' in groups"
   run_once: true

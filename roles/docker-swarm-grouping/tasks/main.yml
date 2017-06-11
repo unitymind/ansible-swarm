@@ -10,7 +10,7 @@
 - name: create swarm_manager_operational group
   add_host:
     hostname: "{{ item }}"
-    groups: swarm_manager_operational
+    groups: swarm_manager_operational, swarm_operational
   with_items: "{{ groups['manager'] }}"
   when: "hostvars[item].swarm_status.stdout == 'active'"
   run_once: true
@@ -18,7 +18,7 @@
 - name: create swarm_manager_bootstrap group
   add_host:
     hostname: "{{ item }}"
-    groups: swarm_manager_bootstrap
+    groups: swarm_manager_bootstrap, swarm_bootstrap
   with_items: "{{ groups['manager'] }}"
   when: "hostvars[item].swarm_status.stdout == 'inactive'"
   run_once: true
@@ -26,7 +26,7 @@
 - name: create swarm_worker_operational group
   add_host:
     hostname: "{{ item }}"
-    groups: swarm_worker_operational
+    groups: swarm_worker_operational, swarm_operational
   with_items: "{{ groups['worker'] }}"
   when: "hostvars[item].swarm_status.stdout == 'active'"
   run_once: true
@@ -34,7 +34,7 @@
 - name: create swarm_worker_bootstrap group
   add_host:
     hostname: "{{ item }}"
-    groups: swarm_worker_bootstrap
+    groups: swarm_worker_bootstrap, swarm_bootstrap
   with_items: "{{ groups['worker'] }}"
   when: "hostvars[item].swarm_status.stdout == 'inactive'"
   run_once: true
