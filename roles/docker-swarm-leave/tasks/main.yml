@@ -1,4 +1,4 @@
 ---
 - name: Forced leave node from a swarm
-  shell: docker swarm leave --force
-  ignore_errors: true
+  docker_swarm_leave:
+    force: true

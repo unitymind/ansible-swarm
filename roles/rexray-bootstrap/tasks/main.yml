@@ -8,6 +8,8 @@
   become: true
   shell: >
     curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
+  args:
+    warn: false
   when: rexray_file.stat.exists == False or rexray.reinstall == True
   notify: Restart
 
