@@ -9,8 +9,14 @@
   script: "{{ bootstrap_type }}.sh"
   when: bootstrapped | failed
 
-- name: Ensure that latest docker-py installed
+- name: Ensure absent of docker-py package
   pip:
     executable: /home/core/miniconda2/bin/pip
     name: docker-py
+    state: absent
+
+- name: Ensure present of latest docker package
+  pip:
+    executable: /home/core/miniconda2/bin/pip
+    name: docker
     state: latest
