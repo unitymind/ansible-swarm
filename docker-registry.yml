@@ -1,7 +1,0 @@
-- hosts: manager
-  roles:
-    - { role: docker-registry, tags: ['docker', 'docker_registry'] }
-
-- hosts: worker
-  roles:
-    - { role: docker-registry-mirror, tags: ['docker', 'docker_registry_mirror'] }

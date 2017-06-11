@@ -1,6 +1,0 @@
-- hosts: all
-  gather_facts: false
-  roles:
-    - { role: coreos-bootstrap, tags: ['bootstrap'] }
-    - { role: docker-bootstrap, tags: ['bootstrap', 'docker'] }
-    - { role: rexray-bootstrap, tags: ['bootstrap', 'rexray'] }

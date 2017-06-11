@@ -1,2 +1,14 @@
-- include: bootstrap.yml
-- include: docker-registry.yml
+- hosts: all
+  gather_facts: false
+  roles:
+    - { role: coreos-bootstrap, tags: ['bootstrap'] }
+    - { role: docker-bootstrap, tags: ['bootstrap', 'docker'] }
+    - { role: rexray-bootstrap, tags: ['bootstrap', 'rexray'] }
+
+- hosts: manager
+  roles:
+    - { role: docker-registry, tags: ['docker_registry'] }
+
+- hosts: worker
+  roles:
+    - { role: docker-registry-mirror, tags: ['docker_registry', 'docker_registry_mirror'] }
