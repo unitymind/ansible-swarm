@@ -1,0 +1,8 @@
+- hosts: all
+  gather_facts: false
+  roles:
+    - { role: docker-swarm-grouping, tags: ['docker', 'swarm'] }
+
+- hosts: swarm_manager_bootstrap
+  roles:
+    - { role: docker-swarm-init, tags: ['docker', 'swarm'] }

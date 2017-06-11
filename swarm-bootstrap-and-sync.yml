@@ -14,6 +14,7 @@
           docker info -f '{{.Swarm.LocalNodeState}}'
         {% endraw -%}
       register: swarm_status
+
     - name: create swarm_manager_operational group
       add_host:
         hostname: "{{ item }}"
@@ -46,6 +47,7 @@
           docker info -f '{{.Swarm.LocalNodeState}}'
         {% endraw -%}
       register: swarm_status
+
     - name: create swarm_worker_operational group
       add_host:
         hostname: "{{ item }}"
