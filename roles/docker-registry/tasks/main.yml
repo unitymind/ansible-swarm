@@ -1,5 +1,7 @@
 ---
 - name: Build /etc/systemd/system/docker-registry.service from template
+  vars:
+    volume_name: "{{ inventory_hostname | regex_replace('_', '-') }}-registry-data"
   become: true
   template:
     src: docker-registry.j2.service

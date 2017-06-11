@@ -5,11 +5,10 @@ After=docker.service
 [Service]
 ExecStartPre=-/usr/bin/docker kill registry
 ExecStartPre=-/usr/bin/docker rm registry
-ExecStartPre=-/usr/bin/docker volume create --driver rexray --opt size=10 \
-  {{ inventory_hostname | regex_replace('_', '-') }}-registry-data
+ExecStartPre=-/usr/bin/docker volume create --driver rexray --opt size=10 {{ volume_name }}
 ExecStartPre=/usr/bin/docker pull registry:2
 ExecStart=/usr/bin/docker run --name registry \
-  -v {{ inventory_hostname | regex_replace('_', '-') }}-registry-data:/var/lib/registry \
+  -v {{ volume_name }}:/var/lib/registry \
   -p 0.0.0.0:5000:5000 \
   -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \
   registry:2
