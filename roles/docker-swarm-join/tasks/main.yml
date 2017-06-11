@@ -5,7 +5,7 @@
     manager_inventory_hostname: "{{ groups['swarm_manager_operational'][0] }}"
     manager_token: "{{ hostvars[manager_inventory_hostname]['swarm_manager_token']['stdout'] }}"
     worker_token: "{{ hostvars[manager_inventory_hostname]['swarm_worker_token']['stdout'] }}"
-    token: "{{ manager_token if inventory_hostname in groups['swarm_manager_bootstrap'] else worker_token }}"
+    token: "{{ manager_token if inventory_hostname in groups['manager'] else worker_token }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
     join_addr: "{{ hostvars[manager_inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
   shell: >
