@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2016, Cleawing, LLC.
+# Copyright 2017, Cleawing, LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 
 DOCUMENTATION = """
 ---
-module: docker_info_facts
+module: docker_facts
 short_description:
     - A module for injecting Docker info as facts.
 description:
     - A module for injecting Docker info as facts.
-author: unitymind
+author: nextrevision, unitymind
 """
 
 EXAMPLES = """
-- name: load docker info facts
-  docker_info_facts:
+- name: load docker facts
+  docker_facts:
 """
 
 
@@ -46,10 +46,12 @@ class InfoManager(DockerBaseClass):
 
     def execute(self):
         try:
+            info = self.client.info()
+            self.results['changed'] = True
             if not self.check_mode:
-                info = self.client.info()
-                self.results['changed'] = True
                 self.results['ansible_facts'] = {'docker': {'info': info}}
+            else:
+                self.results['docker']['info'] = info
         except DockerException as e:
             self.fail(str(e))
 

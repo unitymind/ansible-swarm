@@ -1,6 +1,6 @@
 ---
-- name: load docker info as facts
-  docker_info_facts:
+- name: load docker facts
+  docker_facts:
 
 - name: create swarm_manager_operational group
   add_host:
