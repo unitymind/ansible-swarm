@@ -1,4 +1,7 @@
 - hosts: all
   gather_facts: false
   roles:
-    - { role: coreos-completions, tags: ['tools'] }
+    - role: coreos-completions
+      tags:
+        - development
+        - tools

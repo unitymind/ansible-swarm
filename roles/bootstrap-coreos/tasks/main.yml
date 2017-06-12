@@ -14,3 +14,9 @@
     executable: /home/core/miniconda2/bin/pip
     name: docker
     state: latest
+
+- name: Change toolbox default image to Ubuntu
+  copy:
+    src: .toolboxrc
+    dest: $HOME/.toolboxrc
+    mode: 0644
