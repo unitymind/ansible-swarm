@@ -5,12 +5,11 @@
   changed_when: false
   ignore_errors: true
 
-- name: "[script] Run {{ bootstrap_type }}.sh"
-  script: "{{ bootstrap_type }}.sh"
-  when: bootstrapped | failed
+- name: "[script] Run {{ bootstrap.type }}.sh"
+  script: "{{ bootstrap.type }}.sh"
+  when: (bootstrapped | failed) or boostrap.python_upgrade == True
 
 - name: "[pip] Ensure present of latest docker package"
   pip:
-    executable: /home/core/miniconda2/bin/pip
     name: docker
     state: latest
