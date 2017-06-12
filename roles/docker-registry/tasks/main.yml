@@ -14,6 +14,8 @@
   systemd:
     name: docker-registry
     enabled: yes
+    state: started
+  register: docker_registry_service_enable
 
 - name: Restart if service changed
   become: true
@@ -21,7 +23,7 @@
     name: docker-registry
     daemon_reload: yes
     state: restarted
-  when: docker_registry_service | changed
+  when: (docker_registry_service | changed) and docker_registry_service_enable.changed == False
 
 - name: Ensure that started
   become: true

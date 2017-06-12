@@ -48,7 +48,7 @@ EXAMPLES = """
 
 
 from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseClass
-from docker.errors import APIError
+from docker.errors import DockerException
 
 class SwarmLeaveManager(DockerBaseClass):
 
@@ -68,9 +68,7 @@ class SwarmLeaveManager(DockerBaseClass):
     def execute(self):
         try:
             self.results['changed'] = self.client.leave_swarm(self.force)
-        except APIError as e:
-            self.fail(str(e))
-        except Exception as e:
+        except DockerException as e:
             self.fail(str(e))
 
     def fail(self, msg):
