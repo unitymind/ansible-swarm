@@ -1,15 +1,15 @@
 - hosts: all
   gather_facts: false
   roles:
-    - role: coreos-bootstrap
+    - role: bootstrap-coreos
       tags:
         - bootstrap
         - coreos
-    - role: docker-bootstrap
+    - role: bootstrap-docker
       tags:
         - bootstrap
         - docker
-    - role: rexray-bootstrap
+    - role: bootstrap-rexray
       tags:
         - bootstrap
         - rexray
