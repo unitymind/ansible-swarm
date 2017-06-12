@@ -4,3 +4,4 @@
   systemd:
     name: docker
     state: restarted
+  when: rexray.storage_type == "virtualbox"
