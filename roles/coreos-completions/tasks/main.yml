@@ -1,45 +1,51 @@
 ---
+- name: "[copy] Change toolbox default image to Ubuntu"
+  copy:
+    src: .toolboxrc
+    dest: $HOME/.toolboxrc
+    mode: 0644
+
 - block:
-  - name: Check is bash-completion installed
+  - name: "[stat] Check is bash-completion installed"
     become: true
     stat:
       path: /var/bash-completion/bash_completion
     register: bash_completion
 
-  - name: Install bash-completion
+  - name: "[shell] Install bash-completion"
     become: true
     shell: >
-      toolbox apk-get update \
+      toolbox apt-get update \
       && toolbox apt-get -y install bash-completion wget \
       && toolbox cp /usr/share/bash-completion /media/root/var/ -R
     when:
       - bash_completion.stat.exists == False
 
   - block:
-    - name: Check is Docker completion installed
+    - name: "[stat] Check is Docker completion installed"
       become: true
       stat:
         path: /var/bash-completion/completions/docker
       register: docker_completion
 
-    - name: Install Docker completion
+    - name: "[shell] Install Docker completion"
       become: true
       shell: >
         toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
       when: docker_completion.stat.exists == False
     when: completions.docker == True
 
-  - name: "Stat $HOME/.bashrc"
+  - name: "[stat] Stat $HOME/.bashrc"
     stat:
       path: $HOME/.bashrc
     register: bashrc
 
-  - name: Unlink .bashrc
+  - name: "[shell] Unlink .bashrc"
     shell: >
       cp $(readlink .bashrc) .bashrc.new && mv .bashrc.new .bashrc
     when: bashrc.stat.islnk is defined and bashrc.stat.islnk
 
-  - name: Source /var/bash-completion/bash_completion
+  - name: "[lineinfile] Source /var/bash-completion/bash_completion"
     lineinfile:
       path: $HOME/.bashrc
       line: 'source /var/bash-completion/bash_completion'

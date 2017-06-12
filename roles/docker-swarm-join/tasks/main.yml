@@ -1,5 +1,5 @@
 ---
-- name: join node to cluster
+- name: "[shell] join node to cluster"
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
     manager_inventory_hostname: "{{ groups['swarm_manager_operational'][0] }}"

@@ -1,5 +1,5 @@
 ---
-- name: initialize swarm cluster
+- name: "[shell] initialize swarm cluster"
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
@@ -9,7 +9,7 @@
   register: init_first_node
   run_once: true
 
-- name: add initialized host to swarm_manager_operational group
+- name: "[add_host] add initialized host to swarm_manager_operational group"
   add_host:
     hostname: "{{ inventory_hostname }}"
     groups: swarm_manager_operational, swarm_operational

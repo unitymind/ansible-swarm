@@ -2,7 +2,7 @@
 - name: load docker facts
   docker_facts:
 
-- name: create swarm_manager_operational group
+- name: "[add_host] create swarm_manager_operational group"
   add_host:
     hostname: "{{ item }}"
     groups: swarm_manager_operational, swarm_operational
@@ -10,7 +10,7 @@
   when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'active'"
   run_once: true
 
-- name: create swarm_manager_bootstrap group
+- name: "[add_host] create swarm_manager_bootstrap group"
   add_host:
     hostname: "{{ item }}"
     groups: swarm_manager_bootstrap, swarm_bootstrap
@@ -18,7 +18,7 @@
   when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'inactive'"
   run_once: true
 
-- name: create swarm_worker_operational group
+- name: "[add_host] create swarm_worker_operational group"
   add_host:
     hostname: "{{ item }}"
     groups: swarm_worker_operational, swarm_operational
@@ -26,7 +26,7 @@
   when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'active'"
   run_once: true
 
-- name: create swarm_worker_bootstrap group
+- name: "[add_host] create swarm_worker_bootstrap group"
   add_host:
     hostname: "{{ item }}"
     groups: swarm_worker_bootstrap, swarm_bootstrap

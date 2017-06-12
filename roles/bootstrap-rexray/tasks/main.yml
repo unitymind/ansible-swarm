@@ -1,34 +1,34 @@
 ---
 
-- name: Check is installed
+- name: "[stat] Check is installed"
   stat:
     path: /opt/bin/rexray
   register: rexray_file
 
-- name: Install
+- name: "[shell] Install"
   become: true
   shell: >
     curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
   args:
     warn: false
   when: rexray_file.stat.exists == False or rexray.reinstall == True
-  notify: Restart
+  notify: "[systemd] Restart"
 
 - block:
-  - name: Ensure that /etc/rexray exists
+  - name: "[file] Ensure that /etc/rexray exists"
     become: true
     file:
       path: /etc/rexray
       state: directory
       mode: 0755
 
-  - name: Generate config for Virtualbox
+  - name: "[template] Generate config for Virtualbox"
     become: true
     template:
       src: rexray_config_virtualbox.j2.yml
       dest: /etc/rexray/config.yml
       mode: 0600
-    notify: Restart
+    notify: "[systemd] Restart"
 
 #  - name: Generate config for DigitalOcean
 #    become: true
@@ -39,7 +39,7 @@
 #    when: rexray.storage_type == "digitalocean"
 #    notify: Restart
 
-  - name: Ensure that started
+  - name: "[systemd] Ensure that started"
     become: true
     systemd:
       name: rexray
@@ -48,13 +48,13 @@
   when: rexray.storage_type == "virtualbox"
 
 - block:
-  - name: Install Docker Rexray DigitalOcean volume plugin
+  - name: "[shell] Install Rexray DigitalOcean docker volume plugin"
     shell: >
       docker plugin install --grant-all-permissions rexray/dobs:latest \
         DOBS_REGION={{ rexray.digitalocean.region }} \
         DOBS_TOKEN={{ rexray.digitalocean.token }}
 
-  - name: Ensure that system service is disabled and stopped
+  - name: "[systemd] Ensure that system service is disabled and stopped"
     become: true
     systemd:
       name: rexray

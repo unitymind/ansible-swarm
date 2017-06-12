@@ -1,10 +1,10 @@
 ---
-- name: retrieve swarm manager token
+- name: "[shell] retrieve swarm manager token"
   shell: docker swarm join-token -q manager
   register: swarm_manager_token
   run_once: true
 
-- name: retrieve swarm worker token
+- name: "[shell] retrieve swarm worker token"
   shell: docker swarm join-token -q worker
   register: swarm_worker_token
   run_once: true

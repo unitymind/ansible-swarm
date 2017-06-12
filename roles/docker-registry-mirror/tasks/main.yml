@@ -1,12 +1,12 @@
 ---
-- name: Ensure that /etc/nginx/conf.d
+- name: "[file] Ensure that /etc/nginx/conf.d"
   become: true
   file:
     path: /etc/nginx/conf.d
     state: directory
     mode: 0755
 
-- name: Build /etc/nginx/conf.d/docker-registry-mirror.conf from template
+- name: "[template] Build /etc/nginx/conf.d/docker-registry-mirror.conf from template"
   become: true
   template:
     src: docker-registry-mirror.j2.nginx
@@ -14,7 +14,7 @@
     mode: 0640
   register: docker_registry_nginx_conf
 
-- name: Copy /etc/systemd/system/docker-registry-mirror.service
+- name: "[copy] Copy /etc/systemd/system/docker-registry-mirror.service"
   become: true
   copy:
     src: docker-registry-mirror.service
@@ -22,7 +22,7 @@
     mode: 0640
   register: docker_registry_mirror_service
 
-- name: Restart if service changed
+- name: "[systemd] Restart if service changed"
   become: true
   systemd:
     name: docker-registry-mirror
@@ -31,7 +31,7 @@
     state: restarted
   when: (docker_registry_nginx_conf | changed) or (docker_registry_mirror_service | changed)
 
-- name: Ensure that started
+- name: "[systemd] Ensure that started"
   become: true
   systemd:
     name: docker-registry-mirror

@@ -1,5 +1,5 @@
 ---
-- name: Forced leave node from a swarm
+- name: "[docker_swarm_leave] Forced leave node from a swarm"
   docker_swarm_leave:
     api_version: '1.24'
     force: "{{ swarm.force_leave }}"

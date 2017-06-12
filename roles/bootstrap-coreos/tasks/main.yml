@@ -1,22 +1,16 @@
 ---
-- name: Check is bootstrapped
+- name: "[raw] Check is bootstrapped"
   raw: stat $HOME/.bootstrapped
   register: bootstrapped
   changed_when: false
   ignore_errors: true
 
-- name: "Run {{ bootstrap_type }}.sh"
+- name: "[script] Run {{ bootstrap_type }}.sh"
   script: "{{ bootstrap_type }}.sh"
   when: bootstrapped | failed
 
-- name: Ensure present of latest docker package
+- name: "[pip] Ensure present of latest docker package"
   pip:
     executable: /home/core/miniconda2/bin/pip
     name: docker
     state: latest
-
-- name: Change toolbox default image to Ubuntu
-  copy:
-    src: .toolboxrc
-    dest: $HOME/.toolboxrc
-    mode: 0644

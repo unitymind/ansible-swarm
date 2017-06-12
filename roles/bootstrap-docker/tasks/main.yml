@@ -1,12 +1,12 @@
 ---
-- name: Ensure that drop-ins path exists
+- name: "[file] Ensure that drop-ins path exists"
   become: true
   file:
     path: /etc/systemd/system/docker.service.d
     state: directory
     mode: 0755
 
-- name: Set DOCKER_OPTS for manager
+- name: "[template] Set DOCKER_OPTS for manager"
   vars:
     docker_opts: "--experimental"
   become: true
@@ -14,10 +14,10 @@
     src: 10-docker-opts.j2.conf
     dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
     mode: 0600
-  notify: Reload Docker
+  notify: "[systemd] Reload Docker"
   when: "'manager' in group_names"
 
-- name: Set DOCKER_OPTS for worker
+- name: "[template] Set DOCKER_OPTS for worker"
   vars:
     docker_opts: "--experimental --registry-mirror=http://127.0.0.1:5000"
   become: true
@@ -25,5 +25,5 @@
     src: 10-docker-opts.j2.conf
     dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
     mode: 0600
-  notify: Reload Docker
+  notify: "[systemd] Reload Docker"
   when: "'worker' in group_names"

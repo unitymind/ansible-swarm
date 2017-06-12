@@ -16,6 +16,7 @@ ExecStart=/usr/bin/docker run --name registry \
 ExecStop=-/usr/bin/docker stop registry
 Restart=always
 RestartSec=10s
+TimeoutStartSec=300s
 
 [Install]
 WantedBy=multi-user.target

@@ -1,5 +1,5 @@
 ---
-- name: Restart
+- name: "[systemd] Restart"
   become: true
   systemd:
     name: docker

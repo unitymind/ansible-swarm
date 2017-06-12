@@ -1,7 +1,0 @@
----
-- name: Restart
-  become: true
-  systemd:
-    name: docker-registry
-    daemon_reload: yes
-    state: restarted

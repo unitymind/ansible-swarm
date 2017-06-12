@@ -1,5 +1,5 @@
 ---
-- name: Reload Docker
+- name: "[systemd] Reload Docker"
   become: true
   systemd:
     name: docker
