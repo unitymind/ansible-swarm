@@ -7,7 +7,7 @@
     hostname: "{{ item }}"
     groups: swarm_manager_operational, swarm_operational
   with_items: "{{ groups['manager'] }}"
-  when: "hostvars[item]['docker_info']['Swarm']['LocalNodeState'] == 'active'"
+  when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'active'"
   run_once: true
 
 - name: create swarm_manager_bootstrap group
@@ -15,7 +15,7 @@
     hostname: "{{ item }}"
     groups: swarm_manager_bootstrap, swarm_bootstrap
   with_items: "{{ groups['manager'] }}"
-  when: "hostvars[item]['docker_info']['Swarm']['LocalNodeState'] == 'inactive'"
+  when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'inactive'"
   run_once: true
 
 - name: create swarm_worker_operational group
@@ -23,7 +23,7 @@
     hostname: "{{ item }}"
     groups: swarm_worker_operational, swarm_operational
   with_items: "{{ groups['worker'] }}"
-  when: "hostvars[item]['docker_info']['Swarm']['LocalNodeState'] == 'active'"
+  when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'active'"
   run_once: true
 
 - name: create swarm_worker_bootstrap group
@@ -31,5 +31,5 @@
     hostname: "{{ item }}"
     groups: swarm_worker_bootstrap, swarm_bootstrap
   with_items: "{{ groups['worker'] }}"
-  when: "hostvars[item]['docker_info']['Swarm']['LocalNodeState'] == 'inactive'"
+  when: "hostvars[item]['docker']['info']['Swarm']['LocalNodeState'] == 'inactive'"
   run_once: true

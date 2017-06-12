@@ -49,7 +49,7 @@ class InfoManager(DockerBaseClass):
             if not self.check_mode:
                 info = self.client.info()
                 self.results['changed'] = True
-                self.results['ansible_facts'] = {'docker_info': info}
+                self.results['ansible_facts'] = {'docker': {'info': info}}
         except DockerException as e:
             self.fail(str(e))
 
