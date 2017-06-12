@@ -15,7 +15,7 @@
   - name: "[shell] Install bash-completion"
     shell: >
       toolbox apt-get update \
-      && toolbox apt-get -y install bash-completion wget \
+      && toolbox apt-get -y install bash-completion \
       && toolbox cp /usr/share/bash-completion /media/root/var/ -R
     when:
       - bash_completion.stat.exists == False
@@ -28,10 +28,13 @@
       register: docker_completion
 
     - name: "[shell] Install Docker completion"
+      become: true
       shell: >
-        toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
+        wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /var/bash-completion/completions/docker
+      args:
+        warn: false
       when: docker_completion.stat.exists == False
-    when: completions.docker == True
+    when: completions.docker is defined and completions.docker == True
 
   - name: "[stat] Stat $HOME/.bashrc"
     stat:
@@ -47,4 +50,4 @@
     lineinfile:
       path: $HOME/.bashrc
       line: 'source /var/bash-completion/bash_completion'
-  when: completions.install == True
+  when: completions is defined

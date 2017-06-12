@@ -1,6 +1,7 @@
 ---
 
 - name: "[stat] Check is installed"
+  become: true
   stat:
     path: /opt/bin/rexray
   register: rexray_file
@@ -11,7 +12,7 @@
     curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
   args:
     warn: false
-  when: rexray_file.stat.exists == False or rexray.reinstall == True
+  when: rexray_file.stat.exists == False or rexray.upgrade == True
   notify: "[systemd] Restart"
 
 - block:
@@ -53,6 +54,12 @@
       docker plugin install --grant-all-permissions rexray/dobs:latest \
         DOBS_REGION={{ rexray.digitalocean.region }} \
         DOBS_TOKEN={{ rexray.digitalocean.token }}
+    when: rexray_file.stat.exists == False
+
+  - name: "[shell] Upgrade Rexray DigitalOcean docker volume plugin"
+    shell: >
+      docker plugin upgade --grant-all-permissions rexray/dobs:latest
+    when: rexray.upgrade == True
 
   - name: "[systemd] Ensure that system service is disabled and stopped"
     become: true

@@ -1,15 +1,21 @@
 ---
-- name: "[raw] Check is bootstrapped"
-  raw: stat $HOME/.bootstrapped
-  register: bootstrapped
+- name: "[raw] Check is python installed"
+  raw: "{{ ansible_python_interpreter }} --version"
+  register: python_installed
   changed_when: false
   ignore_errors: true
 
-- name: "[script] Run {{ bootstrap.type }}.sh"
-  script: "{{ bootstrap.type }}.sh"
-  when: (bootstrapped | failed) or boostrap.python_upgrade == True
+- block:
+  - name: "[raw] Force delete /home/core/miniconda2"
+    raw: rm -rf /home/core/miniconda2
+    ignore_errors: true
+
+  - name: "[script] Run {{ bootstrap.type }}.sh"
+    script: "{{ bootstrap.type }}.sh"
+  when: "(python_installed | failed) or bootstrap.python_upgrade == True"
 
 - name: "[pip] Ensure present of latest docker package"
   pip:
+    executable: /home/core/miniconda2/bin/pip
     name: docker
     state: latest
