@@ -1,45 +1,56 @@
 ---
-- name: Check is installed
-  stat:
-    path: /opt/bin/rexray
-  register: rexray_file
+- block:
+  - name: Check is installed
+    stat:
+      path: /opt/bin/rexray
+    register: rexray_file
 
-- name: Install
-  become: true
-  shell: >
-    curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
-  args:
-    warn: false
-  when: rexray_file.stat.exists == False or rexray.reinstall == True
-  notify: Restart
+  - name: Install
+    become: true
+    shell: >
+      curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
+    args:
+      warn: false
+    when: rexray_file.stat.exists == False or rexray.reinstall == True
+    notify: Restart
 
-- name: Ensure that /etc/rexray exists
-  become: true
-  file:
-    path: /etc/rexray
-    state: directory
-    mode: 0755
+  - name: Ensure that /etc/rexray exists
+    become: true
+    file:
+      path: /etc/rexray
+      state: directory
+      mode: 0755
 
-- name: Generate config for Virtualbox
-  become: true
-  template:
-    src: rexray_config_virtualbox.j2.yml
-    dest: /etc/rexray/config.yml
-    mode: 0600
+  - name: Generate config for Virtualbox
+    become: true
+    template:
+      src: rexray_config_virtualbox.j2.yml
+      dest: /etc/rexray/config.yml
+      mode: 0600
+    notify: Restart
+
+#  - name: Generate config for DigitalOcean
+#    become: true
+#    template:
+#      src: rexray_config_digitalocean.j2.yml
+#      dest: /etc/rexray/config.yml
+#      mode: 0600
+#    when: rexray.storage_type == "digitalocean"
+#    notify: Restart
+
+  - name: Ensure that started
+    become: true
+    systemd:
+      name: rexray
+      state: started
+
   when: rexray.storage_type == "virtualbox"
-  notify: Restart
 
-- name: Generate config for DigitalOcean
-  become: true
-  template:
-    src: rexray_config_digitalocean.j2.yml
-    dest: /etc/rexray/config.yml
-    mode: 0600
+- block:
+  - name: Install Docker Rexray DigitalOcean volume plugin
+    shell: >
+      docker plugin install --grant-all-permissions rexray/dobs:latest \
+        DOBS_REGION={{ rexray.digitalocean.region }} \
+        DOBS_TOKEN={{ rexray.digitalocean.token }}
+
   when: rexray.storage_type == "digitalocean"
-  notify: Restart
-
-- name: Ensure that started
-  become: true
-  systemd:
-    name: rexray
-    state: started
