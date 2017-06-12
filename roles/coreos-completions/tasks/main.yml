@@ -13,7 +13,6 @@
     register: bash_completion
 
   - name: "[shell] Install bash-completion"
-    become: true
     shell: >
       toolbox apt-get update \
       && toolbox apt-get -y install bash-completion wget \
@@ -29,7 +28,6 @@
       register: docker_completion
 
     - name: "[shell] Install Docker completion"
-      become: true
       shell: >
         toolbox wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /media/root/var/bash-completion/completions/docker
       when: docker_completion.stat.exists == False
