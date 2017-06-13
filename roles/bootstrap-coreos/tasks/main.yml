@@ -14,8 +14,10 @@
     script: "{{ bootstrap.type }}.sh"
   when: "(python_installed | failed) or bootstrap.python_upgrade == True"
 
-- name: "[pip] Ensure present of latest docker package"
+- name: "[pip] Ensure present of packages"
   pip:
     executable: /home/core/miniconda2/bin/pip
-    name: docker
-    state: latest
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+  with_items: "{{ bootstrap.pip }}"
