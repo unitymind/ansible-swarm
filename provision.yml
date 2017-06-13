@@ -6,6 +6,8 @@
         - bootstrap
         - coreos
     - role: bootstrap-docker
+      vars:
+        docker_engine_options_experimental: "{{ '--experimental' if (docker.engine.options.experimental | default(False)) == True else '' }}"
       tags:
         - bootstrap
         - docker

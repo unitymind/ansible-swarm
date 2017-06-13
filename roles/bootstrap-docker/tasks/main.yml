@@ -8,7 +8,7 @@
 
 - name: "[template] Set DOCKER_OPTS for manager"
   vars:
-    docker_opts: "--experimental"
+    docker_opts: "{{ docker_engine_options_experimental }}"
   become: true
   template:
     src: 10-docker-opts.j2.conf
@@ -19,7 +19,7 @@
 
 - name: "[template] Set DOCKER_OPTS for worker"
   vars:
-    docker_opts: "--experimental --registry-mirror=http://127.0.0.1:5000"
+    docker_opts: "{{ docker_engine_options_experimental }} --registry-mirror=http://127.0.0.1:5000"
   become: true
   template:
     src: 10-docker-opts.j2.conf
