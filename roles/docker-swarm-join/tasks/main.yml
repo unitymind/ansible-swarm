@@ -2,14 +2,17 @@
 - name: "[shell] join node to cluster"
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
+    port: "{{ swarm.port | default('2377') }}"
     manager_inventory_hostname: "{{ groups['swarm_manager_operational'][0] }}"
     manager_token: "{{ hostvars[manager_inventory_hostname]['swarm_manager_token']['stdout'] }}"
     worker_token: "{{ hostvars[manager_inventory_hostname]['swarm_worker_token']['stdout'] }}"
     token: "{{ manager_token if inventory_hostname in groups['manager'] else worker_token }}"
-    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
-    join_addr: "{{ hostvars[manager_inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
-  shell: >
-    docker swarm join
-    --advertise-addr={{ advertise_addr }}:2377
-    --token={{ token }}
-    {{ join_addr }}:2377
+    listen_addr: "{{ swarm.listen | default('0.0.0.0') }}:{{ port }}"
+    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}:{{ port }}"
+    remote_addr: "{{ hostvars[manager_inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}:{{ port }}"
+  docker_swarm_join:
+    remote_addrs:
+      - "{{ remote_addr }}"
+    join_token: "{{ token }}"
+    listen_addr: "{{ listen_addr }}"
+    advertise_addr: "{{ advertise_addr }}"
