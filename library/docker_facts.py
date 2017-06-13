@@ -32,6 +32,7 @@ EXAMPLES = """
 from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseClass
 from docker.errors import DockerException
 
+
 class InfoManager(DockerBaseClass):
 
     def __init__(self, client, results):
@@ -41,19 +42,32 @@ class InfoManager(DockerBaseClass):
         self.client = client
         self.results = results
         self.check_mode = self.client.check_mode
+        self.info = self.client.info
+        self.swarm = self.client.inspect_swarm
 
         self.execute()
 
     def execute(self):
+        # collect common info
         try:
-            info = self.client.info()
+            info = self.info()
             self.results['changed'] = True
             if not self.check_mode:
                 self.results['ansible_facts'] = {'docker': {'info': info}}
             else:
-                self.results['docker']['info'] = info
+                self.results['docker'] = {'info': info}
         except DockerException as e:
             self.fail(str(e))
+
+        # collect swarm inspect (if node is part of swarm and has manager role)
+        try:
+            swarm_info = self.swarm()
+            if not self.check_mode:
+                self.results['ansible_facts']['docker']['swarm'] = {'info': swarm_info}
+            else:
+                self.results['docker']['swarm'] = {'info': swarm_info}
+        except DockerException:
+            pass
 
     def fail(self, msg):
         self.client.fail(msg)

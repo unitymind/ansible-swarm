@@ -1,6 +1,7 @@
 ---
 - name: load docker facts
   docker_facts:
+  no_log: true
 
 - name: "[add_host] create swarm_manager_operational group"
   add_host:

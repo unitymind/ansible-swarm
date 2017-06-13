@@ -1,18 +1,28 @@
 ---
-- name: "[shell] join node to cluster"
+- name: load docker facts
+  docker_facts:
+  no_log: true
+
+- name: join node to cluster
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
     port: "{{ swarm.port | default('2377') }}"
     manager_inventory_hostname: "{{ groups['swarm_manager_operational'][0] }}"
-    manager_token: "{{ hostvars[manager_inventory_hostname]['swarm_manager_token']['stdout'] }}"
-    worker_token: "{{ hostvars[manager_inventory_hostname]['swarm_worker_token']['stdout'] }}"
+    manager_token: "{{ hostvars[manager_inventory_hostname]['docker']['swarm']['info']['JoinTokens']['Manager'] }}"
+    worker_token: "{{ hostvars[manager_inventory_hostname]['docker']['swarm']['info']['JoinTokens']['Worker'] }}"
     token: "{{ manager_token if inventory_hostname in groups['manager'] else worker_token }}"
     listen_addr: "{{ swarm.listen | default('0.0.0.0') }}:{{ port }}"
     advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}:{{ port }}"
     remote_addr: "{{ hostvars[manager_inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}:{{ port }}"
   docker_swarm_join:
+    api_version: "1.24"
     remote_addrs:
       - "{{ remote_addr }}"
     join_token: "{{ token }}"
+# See: https://github.com/docker/docker-py/pull/1641
     listen_addr: "{{ listen_addr }}"
     advertise_addr: "{{ advertise_addr }}"
+  when: >
+    (inventory_hostname in groups['swarm_bootstrap'])
+    and
+    (inventory_hostname not in groups['swarm_operational'])

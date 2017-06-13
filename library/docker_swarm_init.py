@@ -15,32 +15,29 @@
 
 DOCUMENTATION = """
 ---
-module: docker_swarm_join
+module: docker_swarm_init
 short_description:
-    - A module for join a swarm that has already been created.
+    - A module for initialize a new Swarm using the current connected engine as the first node.
 description:
-    - A module for join a swarm that has already been created.
+    - A module for initialize a new Swarm using the current connected engine as the first node.
 author: unitymind
 
 options:
-  remote_addrs:
-    description:
-      - Addresses of one or more manager nodes already participating in the Swarm to join.
-    required: true
-  join_token:
-    description:
-      - Secret token for joining this Swarm.
-    required: true
-  listen_addr:
-    description:
-      - Listen address used for inter-manager communication if the node gets promoted to manager, as well as determining the networking interface used for the VXLAN Tunnel Endpoint (VTEP).
-    required: false
-    default: '0.0.0.0:2377'
   advertise_addr:
     description:
-      - Externally reachable address advertised to other nodes. This can either be an address/port combination in the form 192.168.1.1:4567, or an interface followed by a port number, like eth0:4567. If the port number is omitted, the port number from the listen address is used. If AdvertiseAddr is not specified, it will be automatically detected when possible.
+      - Externally reachable address advertised to other nodes. This can either be an address/port combination in the form 192.168.1.1:4567, or an interface followed by a port number, like eth0:4567. If the port number is omitted, the port number from the listen address is used. If advertise_addr is not specified, it will be automatically detected when possible.
     required: false
     default: null
+  listen_addr:
+    description:
+      - Listen address used for inter-manager communication, as well as determining the networking interface used for the VXLAN Tunnel Endpoint (VTEP). This can either be an address/port combination in the form 192.168.1.1:4567, or an interface followed by a port number, like eth0:4567. If the port number is omitted, the default swarm listening port is used.
+    required: false
+    default: '0.0.0.0:2377'
+  force_new_cluster:
+    description: Force creating a new Swarm, even if already part of one.
+    required: false
+    default: false
+  
 
 extends_documentation_fragment:
     - docker
@@ -52,10 +49,10 @@ requirements:
 # FIXME
 EXAMPLES = """
 - name: Leave node from a cluster
-  docker_swarm_join:
+  docker_swarm_init:
 
 - name: Force leave node from a cluster
-  docker_swarm_leave:
+  docker_swarm_init:
     force: True
 """
 
@@ -64,28 +61,28 @@ from ansible.module_utils.docker_common import AnsibleDockerClient, DockerBaseCl
 from docker.errors import DockerException
 
 
-# TODO. Add swarm_spec dict params
-class SwarmJoinManager(DockerBaseClass):
+class SwarmInitManager(DockerBaseClass):
 
     def __init__(self, client, results):
 
-        super(SwarmJoinManager, self).__init__()
+        super(SwarmInitManager, self).__init__()
 
         self.client = client
         self.results = results
         self.check_mode = self.client.check_mode
         parameters = self.client.module.params
 
-        self.remote_addrs = parameters.get("remote_addrs")
-        self.join_token = parameters.get("join_token")
-        self.listen_addr = parameters.get("listen_addr", None)
         self.advertise_addr = parameters.get("advertise_addr", None)
+        self.listen_addr = parameters.get("listen_addr")
+        self.force_new_cluster = parameters.get("force_new_cluster")
 
         self.execute()
 
     def execute(self):
         try:
-            self.results['changed'] = self.client.join_swarm(self.remote_addrs, self.join_token, self.listen_addr, self.advertise_addr)
+            self.results['changed'] = self.client.init_swarm(
+                self.advertise_addr, self.listen_addr, self.force_new_cluster
+            )
         except DockerException as e:
             self.fail(str(e))
 
@@ -95,10 +92,9 @@ class SwarmJoinManager(DockerBaseClass):
 
 def main():
     argument_spec = dict(
-        remote_addrs=dict(type='list'),
-        join_token=dict(type='str', no_log=True),
+        advertise_addr=dict(type='str', required=False),
         listen_addr=dict(type='str', required=False, default='0.0.0.0:2377'),
-        advertise_addr=dict(type='str', required=False)
+        force_new_cluster=dict(type='bool', required=False, default=False)
     )
 
     client = AnsibleDockerClient(
@@ -110,7 +106,7 @@ def main():
         changed=False
     )
 
-    SwarmJoinManager(client, results)
+    SwarmInitManager(client, results)
     client.module.exit_json(**results)
 
 if __name__ == '__main__':
