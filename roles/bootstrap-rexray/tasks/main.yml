@@ -9,7 +9,7 @@
 - name: "[shell] Install"
   become: true
   shell: >
-    curl -sSL https://dl.bintray.com/emccode/rexray/install | sh
+    curl -sSL https://dl.bintray.com/emccode/rexray/install | sh -s -- stable {{ rexray.version }}
   args:
     warn: false
   when: rexray_file.stat.exists == False or rexray.upgrade == True
@@ -49,17 +49,22 @@
   when: rexray.storage_type == "virtualbox"
 
 - block:
+  - name: "[shell] Check if plugin installed"
+    shell: >
+      docker plugin ls | grep 'rexray/dobs'
+    register: docker_plugin_installed
+
   - name: "[shell] Install Rexray DigitalOcean docker volume plugin"
     shell: >
-      docker plugin install --grant-all-permissions rexray/dobs:latest \
-        DOBS_REGION={{ rexray.digitalocean.region }} \
-        DOBS_TOKEN={{ rexray.digitalocean.token }}
-    when: rexray_file.stat.exists == False
+      docker plugin install --grant-all-permissions rexray/dobs:{{ rexray.version }} \
+        DOBS_REGION={{ digitalocean.region }} \
+        DOBS_TOKEN={{ digitalocean.token }}
+    when: docker_plugin_installed | failed
 
   - name: "[shell] Upgrade Rexray DigitalOcean docker volume plugin"
     shell: >
-      docker plugin upgade --grant-all-permissions rexray/dobs:latest
-    when: rexray.upgrade == True
+      docker plugin upgade --grant-all-permissions rexray/dobs:{{ rexray.version }}
+    when: "rexray.upgrade == True and (docker_plugin_installed | success)"
 
   - name: "[systemd] Ensure that system service is disabled and stopped"
     become: true
@@ -67,5 +72,10 @@
       name: rexray
       state: stopped
       enabled: false
+
+  - name: "[shell] Ensure that plugin installed and enabled"
+    shell: >
+      docker plugin enable rexray/dobs:{{ rexray.version }} \
+      && docker plugin ls | grep 'rexray/dobs:{{ rexray.version }}' | grep 'true'
 
   when: rexray.storage_type == "digitalocean"
