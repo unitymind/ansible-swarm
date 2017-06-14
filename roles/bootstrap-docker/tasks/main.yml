@@ -6,16 +6,16 @@
     state: directory
     mode: 0755
 
-- name: "[template] Set DOCKER_OPTS for manager"
-  vars:
-    docker_opts: "{{ docker_engine_options_experimental }}"
-  become: true
-  template:
-    src: 10-docker-opts.j2.conf
-    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
-    mode: 0600
-  notify: "[systemd] Reload Docker"
-  when: "'manager' in group_names"
+#- name: "[template] Set DOCKER_OPTS for manager"
+#  vars:
+#    docker_opts: "{{ docker_engine_options_experimental }}"
+#  become: true
+#  template:
+#    src: 10-docker-opts.j2.conf
+#    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
+#    mode: 0600
+#  notify: "[systemd] Reload Docker"
+#  when: "'manager' in group_names"
 
 - name: "[template] Set DOCKER_OPTS for worker"
   vars:
@@ -26,4 +26,3 @@
     dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
     mode: 0600
   notify: "[systemd] Reload Docker"
-  when: "'worker' in group_names"

@@ -5,12 +5,6 @@
       tags:
         - bootstrap
         - coreos
-    - role: bootstrap-docker
-      vars:
-        docker_engine_options_experimental: "{{ '--experimental' if (docker.engine.options.experimental | default(False)) == True else '' }}"
-      tags:
-        - bootstrap
-        - docker
     - role: bootstrap-rexray
       tags:
         - bootstrap
@@ -23,10 +17,17 @@
         - docker
         - docker_registry
 
-- hosts: worker
+- hosts: manager, worker
   roles:
     - role: docker-registry-mirror
       tags:
         - docker
         - docker_registry
         - docker_registry_mirror
+
+    - role: bootstrap-docker
+      vars:
+        docker_engine_options_experimental: "{{ '--experimental' if (docker.engine.options.experimental | default(False)) == True else '' }}"
+      tags:
+        - bootstrap
+        - docker
