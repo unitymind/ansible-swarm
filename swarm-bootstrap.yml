@@ -5,16 +5,18 @@
         - docker
         - swarm
 
-- hosts: swarm_manager_bootstrap
   roles:
     - role: docker-swarm-init
       when: >
         'swarm_manager_operational' not in groups
+        and
+        (groups['swarm_manager_bootstrap] is defined)
+        and
+        (inventory_hostname) in groups['swarm_manager_bootstrap')
       tags:
         - docker
         - swarm
 
-- hosts: manager, worker
   roles:
     - role: docker-swarm-join
       when: >
