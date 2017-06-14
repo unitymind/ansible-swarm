@@ -30,11 +30,14 @@
     - name: "[shell] Install Docker completion"
       become: true
       shell: >
-        wget https://raw.githubusercontent.com/docker/docker/master/contrib/completion/bash/docker -O /var/bash-completion/completions/docker
+        wget https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/completion/bash/docker -O /var/bash-completion/completions/docker
       args:
         warn: false
-      when: docker_completion.stat.exists == False
-    when: completions.docker is defined and completions.docker == True
+      when: >
+        docker_completion.stat.exists == False
+        or docker_completion.stat.size == 0
+        or completions.docker == 'upgrade'
+    when: completions.docker is defined and (completions.docker in ['install', 'upgrade'])
 
   - name: "[stat] Stat $HOME/.bashrc"
     stat:
