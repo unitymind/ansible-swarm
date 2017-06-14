@@ -51,7 +51,6 @@ class InfoManager(DockerBaseClass):
         # collect common info
         try:
             info = self.info()
-            self.results['changed'] = True
             if not self.check_mode:
                 self.results['ansible_facts'] = {'docker': {'info': info}}
             else:
@@ -59,7 +58,7 @@ class InfoManager(DockerBaseClass):
         except DockerException as e:
             self.fail(str(e))
 
-        # collect swarm inspect (if node is part of swarm and has manager role)
+        # collect swarm info (if node is part of swarm and has manager role)
         try:
             swarm_info = self.swarm()
             if not self.check_mode:
