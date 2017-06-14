@@ -6,7 +6,7 @@
     state: directory
     mode: 0755
 
-- name: "[template] Build /etc/nginx/conf.d/docker-registry-mirror.conf from template"
+- name: "[template] Build /etc/nginx/conf.d/docker-registry-mirror.conf"
   become: true
   template:
     src: docker-registry-mirror.j2.nginx
@@ -14,10 +14,10 @@
     mode: 0640
   register: docker_registry_nginx_conf
 
-- name: "[copy] Copy /etc/systemd/system/docker-registry-mirror.service"
+- name: "[template] Build /etc/systemd/system/docker-registry-mirror.service"
   become: true
-  copy:
-    src: docker-registry-mirror.service
+  template:
+    src: docker-registry-mirror.j2.service
     dest: /etc/systemd/system/docker-registry-mirror.service
     mode: 0640
   register: docker_registry_mirror_service

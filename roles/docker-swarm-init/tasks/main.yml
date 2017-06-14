@@ -1,17 +1,20 @@
 ---
-- name: "[shell] initialize swarm cluster"
+- name: "[docker_swarm_init] initialize swarm cluster"
   vars:
     iface: "{{ swarm.iface | default('eth0') }}"
-    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}"
-  shell: >
-    docker swarm init
-    --advertise-addr={{ advertise_addr }}:2377
-  register: init_first_node
+    port: "{{ swarm.port | default('2377') }}"
+    advertise_addr: "{{ hostvars[inventory_hostname]['ansible_' + iface]['ipv4']['address'] }}:{{ port }}"
+    listen_addr: "{{ swarm.listen | default('0.0.0.0') }}:{{ port }}"
+  docker_swarm_init:
+    api_version: "1.24"
+    advertise_addr: "{{ advertise_addr }}"
+    listen_addr: "{{ listen_addr }}"
+  register: swarm_init
   run_once: true
 
 - name: "[add_host] add initialized host to swarm_manager_operational group"
   add_host:
     hostname: "{{ inventory_hostname }}"
     groups: swarm_manager_operational, swarm_operational
-  when: init_first_node | changed
+  when: swarm_init | changed
   run_once: true
