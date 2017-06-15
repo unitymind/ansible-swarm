@@ -3,7 +3,7 @@
 - name: "[stat] Check is installed"
   become: true
   stat:
-    path: /opt/bin/rexray
+    path: /usr/bin/rexray
   register: rexray_file
 
 - name: "[shell] Install"

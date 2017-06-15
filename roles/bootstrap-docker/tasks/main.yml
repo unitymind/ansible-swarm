@@ -1,28 +1,8 @@
 ---
-- name: "[file] Ensure that drop-ins path exists"
-  become: true
-  file:
-    path: /etc/systemd/system/docker.service.d
-    state: directory
-    mode: 0755
-
-#- name: "[template] Set DOCKER_OPTS for manager"
-#  vars:
-#    docker_opts: "{{ docker_engine_options_experimental }}"
-#  become: true
-#  template:
-#    src: 10-docker-opts.j2.conf
-#    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
-#    mode: 0600
-#  notify: "[systemd] Reload Docker"
-#  when: "'manager' in group_names"
-
-- name: "[template] Set DOCKER_OPTS for worker"
-  vars:
-    docker_opts: "{{ docker_engine_options_experimental }} --registry-mirror=http://127.0.0.1:{{  docker.registry.mirror.port }}"
+- name: "[template] Build /etc/docker/daemon.json from template"
   become: true
   template:
-    src: 10-docker-opts.j2.conf
-    dest: /etc/systemd/system/docker.service.d/10-docker-opts.conf
+    src: daemon.j2.json
+    dest: /etc/docker/daemon.json
     mode: 0600
   notify: "[systemd] Reload Docker"

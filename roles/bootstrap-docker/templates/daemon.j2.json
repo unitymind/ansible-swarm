@@ -1,0 +1,4 @@
+{
+  "storage-driver": "overlay2",
+  "registry-mirrors": ["http://127.0.0.1:{{  docker.registry.mirror.port }}"]
+}

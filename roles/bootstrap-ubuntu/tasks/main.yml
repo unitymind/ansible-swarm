@@ -1,0 +1,47 @@
+---
+- name: "[shell] apt-get update"
+  become: true
+  shell: >
+      apt-get update
+  args:
+    warn: no
+    
+- name: "[shell] Check is Docker installed"
+  become: true
+  shell: >
+    docker version
+  register: docker_installed
+  changed_when: false
+  ignore_errors: true
+
+- name: "[shell] Install Docker"
+  shell: >
+    curl -sSL https://get.docker.com/ | sh
+  args:
+    warn: no
+  when: docker_installed | failed
+
+- name: "[shell] Add current user to docker group"
+  become: true
+  shell: >
+    usermod -aG docker {{ ansible_ssh_user }}
+  when: docker_installed | failed
+
+- name: "[apt] Install python-pip from apt"
+  become: true
+  apt:
+    name: python-pip
+    state: present
+
+- name: "[shell] Upgrade pip"
+  shell: >
+    pip install --upgrade pip
+  args:
+    warn: no
+
+- name: "[pip] Ensure present of packages"
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+  with_items: "{{ bootstrap.pip }}"
