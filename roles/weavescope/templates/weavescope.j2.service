@@ -1,0 +1,15 @@
+[Unit]
+Description=Weavescope Probe Service
+After=docker.service
+
+[Service]
+ExecStartPre=/usr/local/bin/scope launch --service-token={{ tools.weavescope.service_token }} --weave=false
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/docker attach weavescope
+ExecStop=-/usr/local/bin/scope stop
+Restart=always
+RestartSec=10s
+TimeoutStartSec=300s
+
+[Install]
+WantedBy=multi-user.target

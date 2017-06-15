@@ -1,45 +1,42 @@
 ---
-- name: "[shell] apt-get update"
-  become: true
-  shell: >
-      apt-get update
-  args:
-    warn: no
-    
-- name: "[shell] Check is Docker installed"
-  become: true
-  shell: >
-    docker version
+- name: "[stat] Check is Docker installed"
+  stat:
+    path: /usr/bin/docker
   register: docker_installed
-  changed_when: false
-  ignore_errors: true
+
+- name: "[apt] Update cache"
+  become: true
+  apt:
+    update_cache: yes
+  when: docker_installed.stat.exists == False
 
 - name: "[shell] Install Docker"
   shell: >
     curl -sSL https://get.docker.com/ | sh
   args:
     warn: no
-  when: docker_installed | failed
+  when: docker_installed.stat.exists == False
 
 - name: "[shell] Add current user to docker group"
   become: true
   shell: >
     usermod -aG docker {{ ansible_ssh_user }}
-  when: docker_installed | failed
+  when: docker_installed.stat.exists == False
 
-- name: "[apt] Install python-pip from apt"
+- name: "[apt] Install latest python-setuptools"
   become: true
   apt:
-    name: python-pip
-    state: present
+    name: python-setuptools
+    state: latest
 
-- name: "[shell] Upgrade pip"
-  shell: >
-    pip install --upgrade pip
-  args:
-    warn: no
+- name: "[easy_install] Install latest pip"
+  become: true
+  easy_install:
+    name: pip
+    state: latest
 
 - name: "[pip] Ensure present of packages"
+  become: true
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"

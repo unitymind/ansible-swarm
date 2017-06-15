@@ -1,5 +1,5 @@
 ---
-- name: "[template] Build /etc/docker/daemon.json from template"
+- name: "[template] Build /etc/docker/daemon.json"
   become: true
   template:
     src: daemon.j2.json

@@ -23,7 +23,7 @@
       state: directory
       mode: 0755
 
-  - name: "[template] Generate config for Virtualbox"
+  - name: "[template] Build config for Virtualbox"
     become: true
     template:
       src: rexray_config_virtualbox.j2.yml
