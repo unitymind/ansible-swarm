@@ -1,0 +1,6 @@
+- hosts: all
+  roles:
+    - role: upgrade-ubuntu
+      tags:
+        - upgrade
+        - ubuntu

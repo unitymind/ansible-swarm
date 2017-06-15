@@ -1,5 +1,12 @@
 - hosts: all
+  vars:
+    upgrade_mode: full
   roles:
+    - role: upgrade-ubuntu
+      tags:
+        - bootstrap
+        - upgrade
+        - ubuntu
     - role: bootstrap-ubuntu
       tags:
         - bootstrap

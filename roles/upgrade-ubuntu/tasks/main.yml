@@ -1,0 +1,60 @@
+---
+# - name: "[shell] Cleanup state"
+#   become: true
+#   shell: >
+#     rm -rf /var/lib/apt/lists/* \
+#     && apt-get clean
+#   args:
+#     warn: false
+# https://askubuntu.com/questions/410045/the-package-lists-or-status-file-could-not-be-parsed-or-opened
+
+- name: "[apt] Ensure that apitude installed with cache update"
+  become: true
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: yes
+
+- name: "[apt] Full upgrade"
+  become: true
+  apt:
+    upgrade: full
+  when: upgrade_mode == 'full'
+
+- name: "[apt] Dist upgrade"
+  become: true
+  apt:
+    upgrade: dist
+  when: upgrade_mode == 'dist'
+
+- name: "[shell] Upgrade packages"
+  become: true
+  shell: >
+    apt-get upgrade -y
+  args:
+    warn: false
+  when: upgrade_mode == 'packages'
+
+- name: "[stat] Check if a reboot is required"
+  stat:
+    path: /var/run/reboot-required
+    get_md5: no
+  register: reboot_required
+
+- name: "[shell] Restart machine"
+  become: true
+  shell: >
+    sleep 2 && shutdown -r now "Ansible upgrade triggered"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: reboot_required.stat.exists == True
+
+- name: "[waif_for] Server to come back online after reboot"
+  connection: local
+  wait_for:
+    port: 22
+    host: "{{ hostvars[inventory_hostname]['ansible_' + (external_iface | default('eth0'))]['ipv4']['address'] }}"
+    search_regex: OpenSSH
+    delay: 15
+  when: reboot_required.stat.exists == True
