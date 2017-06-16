@@ -1,0 +1,50 @@
+---
+- name: "[template] Generate /etc/systemd/system/weavenet.service"
+  become: true
+  template:
+    src: weavenet.j2.service
+    dest: /etc/systemd/system/weavenet.service
+    mode: 0640
+  register: weavenet_service
+
+- name: "[template] Generate /etc/default/weave"
+  become: true
+  template:
+    src: weave.j2
+    dest: /etc/default/weave
+    mode: 0640
+  register: weavenet_default
+
+- name: "[systemd] Ensure that enabled"
+  become: true
+  systemd:
+    name: weavenet
+    enabled: true
+
+- name: "[get_url] Get latest /usr/local/bin/weave"
+  become: true
+  get_url:
+    url: https://git.io/weave
+    dest: /usr/local/bin/weave
+    mode: 0755
+  register: weave_script
+
+- name: "[systemd] Restart if service changed"
+  become: true
+  systemd:
+    name: weavenet
+    daemon_reload: yes
+    state: restarted
+  when: (weavenet_service | changed) or (weave_script | changed)
+
+- name: "[systemd] Ensure that started"
+  become: true
+  systemd:
+    name: weavenet
+    state: started
+
+- name: "[shell] Connect Weave"
+  shell: >
+    weave connect {{ hostvars[item]['ansible_' + (external_iface | default('eth0'))]['ipv4']['address'] }}
+  with_items: "{{ groups['all'] }}"
+  when: item != inventory_hostname

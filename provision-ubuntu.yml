@@ -11,14 +11,18 @@
       tags:
         - bootstrap
         - ubuntu
-    - role: bootstrap-docker
-      tags:
-        - bootstrap
-        - docker
     - role: bootstrap-rexray
       tags:
         - bootstrap
         - rexray
+    - role: bootstrap-docker
+      tags:
+        - bootstrap
+        - docker
+    - role: bootstrap-weavenet
+      tags:
+        - bootstrap
+        - weavenet
 
 - hosts: manager
   roles:

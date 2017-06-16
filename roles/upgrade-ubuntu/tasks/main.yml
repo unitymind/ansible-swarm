@@ -1,13 +1,4 @@
 ---
-# - name: "[shell] Cleanup state"
-#   become: true
-#   shell: >
-#     rm -rf /var/lib/apt/lists/* \
-#     && apt-get clean
-#   args:
-#     warn: false
-# https://askubuntu.com/questions/410045/the-package-lists-or-status-file-could-not-be-parsed-or-opened
-
 - name: "[apt] Ensure that apitude installed with cache update"
   become: true
   apt:
