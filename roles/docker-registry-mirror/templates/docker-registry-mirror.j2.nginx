@@ -3,7 +3,7 @@
 
 upstream docker-registry {
  {% for host in groups['manager'] %}
- server {{ hostvars[host]['ansible_' + (docker.registry.iface | default('eth0'))]['ipv4']['address'] }}:{{ docker.registry.port }};
+ server registry-{{ host }}:{{ docker.registry.port }};
  {% endfor %}
 }
 
