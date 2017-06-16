@@ -10,6 +10,7 @@
     - curl
     - software-properties-common
     - python-setuptools
+    - zfs
 
 - name: "[easy_install] Install latest pip"
   become: true
