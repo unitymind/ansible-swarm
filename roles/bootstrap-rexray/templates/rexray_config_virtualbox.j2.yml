@@ -1,4 +1,5 @@
 libstorage:
   service: virtualbox
 virtualbox:
+  controllerName: 'SATA Controller'
   volumePath: "{{ rexray.virtualbox.volume_path }}"
