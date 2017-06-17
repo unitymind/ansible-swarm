@@ -3,7 +3,15 @@ Description=Weavescope Probe Service
 After=docker.service
 
 [Service]
-ExecStartPre=/usr/local/bin/scope launch --service-token={{ tools.weavescope.service_token }}
+ExecStartPre=/usr/local/bin/scope launch \
+  --probe.processes=true \
+  --probe.spy.interval=15s \
+  --probe.docker.interval=15s \
+  --probe.no-controls \
+  --probe.ebpf.connections=true \
+  --probe.omit.cmd-args \
+  --probe.omit.env-vars \
+  --service-token={{ tools.weavescope.service_token }}
 ExecStartPre=/bin/sleep 5
 ExecStart=/usr/bin/docker attach weavescope
 ExecStop=-/usr/local/bin/scope stop
