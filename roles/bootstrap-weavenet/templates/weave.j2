@@ -1,1 +1,2 @@
-WEAVE_PASSWORD="{{ weave_password }}"
+WEAVE_PASSWORD="{{ weave.password }}"
+PEERS="{% for host in groups['all'] %}{{ hostvars[host]['ansible_' + (external_iface | default('eth0'))]['ipv4']['address'] + ' ' if host != inventory_hostname else ' ' }}{% endfor %}"

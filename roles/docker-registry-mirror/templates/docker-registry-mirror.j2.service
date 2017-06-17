@@ -1,6 +1,7 @@
 [Unit]
 Description=Docker Local Registry Mirror via Proxy
-After=docker.service
+Requires=weavenet.service
+After=weavenet.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill registry-mirror-{{ inventory_hostname }}

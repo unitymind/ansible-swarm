@@ -1,6 +1,7 @@
 [Unit]
 Description=Docker Private Registry Service
-After=docker.service
+Requires=weavenet.service
+After=weavenet.service
 
 [Service]
 ExecStartPre=-/usr/bin/docker kill registry-{{ inventory_hostname }}

@@ -35,7 +35,7 @@
     name: weavenet
     daemon_reload: yes
     state: restarted
-  when: (weavenet_service | changed) or (weave_script | changed)
+  when: (weavenet_default | changed) or (weavenet_service | changed) or (weave_script | changed)
 
 - name: "[systemd] Ensure that started"
   become: true
@@ -43,8 +43,9 @@
     name: weavenet
     state: started
 
-- name: "[shell] Connect Weave"
+- name: "[shell] Following to force consensus"
+  become: true
   shell: >
-    weave connect {{ hostvars[item]['ansible_' + (external_iface | default('eth0'))]['ipv4']['address'] }}
-  with_items: "{{ groups['all'] }}"
-  when: item != inventory_hostname
+    weave prime
+  when: (weavenet_default | changed) or (weavenet_service | changed) or (weave_script | changed)
+  run_once: true

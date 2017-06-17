@@ -47,7 +47,7 @@
   register: reboot_required
 
 - block:
-  - name: "[shell] Restart machine"
+  - name: "[shell] Reboot"
     become: true
     shell: >
       sleep 2 && reboot
