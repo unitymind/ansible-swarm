@@ -2,7 +2,7 @@
   vars:
     upgrade_mode: full
   roles:
-    - role: upgrade-ubuntu
+    - role: ubuntu-upgrade
       tags:
         - bootstrap
         - upgrade
@@ -24,11 +24,6 @@
         - bootstrap
         - weave
         - weavenet
-    - role: docker-socat-proxy
-      tags:
-        - bootstrap
-        - docker
-        - socat
 
 - hosts: manager
   roles:
@@ -44,3 +39,7 @@
         - docker
         - docker_registry
         - docker_registry_mirror
+    - role: docker-socat-proxy
+      tags:
+        - docker
+        - socat-proxy

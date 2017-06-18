@@ -1,6 +1,6 @@
 - hosts: all
   roles:
-    - role: weavescope
+    - role: monitoring-weavescope
       tags:
         - docker
         - swarm
