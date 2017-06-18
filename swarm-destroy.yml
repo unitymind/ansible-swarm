@@ -1,12 +1,12 @@
 - hosts: manager, worker
   gather_facts: false
   roles:
-    - role: docker-swarm-grouping
+    - role: docker/swarm/grouping
       tags:
         - docker
         - swarm
 
-    - role: docker-swarm-leave
+    - role: docker/swarm/leave
       when: >
         (groups['swarm_operational'] is defined)
         and

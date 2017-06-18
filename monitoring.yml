@@ -1,12 +1,12 @@
 - hosts: all
   roles:
-    - role: monitoring-weavescope
+    - role: monitoring/weavescope
       tags:
         - docker
         - swarm
         - weave
         - weavescope
-    - role: monitoring-portainer
+    - role: monitoring/portainer
       tags:
         - docker
         - portainer

@@ -1,11 +1,11 @@
 - hosts: manager, worker
   roles:
-    - role: docker-swarm-grouping
+    - role: docker/swarm/grouping
       tags:
         - docker
         - swarm
 
-    - role: docker-swarm-init
+    - role: docker/swarm/init
       when: >
         'swarm_manager_operational' not in groups
         and
@@ -16,7 +16,7 @@
         - docker
         - swarm
 
-    - role: docker-swarm-join
+    - role: docker/swarm/join
       when: >
         (groups['swarm_manager_operational'] is defined)
         and
