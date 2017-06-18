@@ -24,6 +24,10 @@
         - bootstrap
         - weave
         - weavenet
+    - role: docker-socat-proxy
+      tags:
+        - docker
+        - socat-proxy
 
 - hosts: manager
   roles:
@@ -39,7 +43,3 @@
         - docker
         - docker_registry
         - docker_registry_mirror
-    - role: docker-socat-proxy
-      tags:
-        - docker
-        - socat-proxy

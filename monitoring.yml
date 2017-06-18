@@ -6,3 +6,8 @@
         - swarm
         - weave
         - weavescope
+    - role: monitoring-portainer
+      tags:
+        - docker
+        - portainer
+      when: inventory_hostname in groups['monitoring']

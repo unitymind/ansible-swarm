@@ -1,0 +1,44 @@
+---
+- name: "[template] Build /etc/systemd/system/portainer.service"
+  become: true
+  template:
+    src: portainer.j2.service
+    dest: /etc/systemd/system/portainer.service
+    mode: 0640
+  register: portainer_service
+
+- name: "[file] Ensure that /etc/portainer exists"
+  become: true
+  file:
+    path: /etc/portainer
+    state: directory
+    mode: 0755
+
+- name: "[template] Build /etc/portainer/endpoints.json"
+  become: true
+  template:
+    src: endpoints.j2.json
+    dest: /etc/portainer/endpoints.json
+    mode: 0640
+
+- name: "[systemd] Enable"
+  become: true
+  systemd:
+    name: portainer
+    enabled: yes
+    state: started
+  register: portainer_service_enable
+
+- name: "[systemd] Restart if service changed"
+  become: true
+  systemd:
+    name: portainer
+    daemon_reload: yes
+    state: restarted
+  when: (portainer_service | changed) and portainer_service_enable.changed == False
+
+- name: "[systemd] Ensure that started"
+  become: true
+  systemd:
+    name: portainer
+    state: started
