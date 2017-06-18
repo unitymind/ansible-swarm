@@ -6,6 +6,21 @@
     path: /usr/bin/rexray
   register: rexray_file
 
+- name: "[file] Ensure that /etc/systemd/system/rexray.service.d exists"
+  become: true
+  file:
+    path: /etc/systemd/system/rexray.service.d
+    state: directory
+    mode: 0755
+
+- name: "[copy] Drop-ins for rexray.service"
+  become: true
+  copy:
+    src: rexray.service.d/10-restart-policy.conf
+    dest: /etc/systemd/system/rexray.service.d/10-restart-policy.conf
+    mode: 0600
+  notify: "[systemd] Reload"
+
 - name: "[shell] Install"
   become: true
   shell: >
@@ -13,7 +28,7 @@
   args:
     warn: false
   when: rexray_file.stat.exists == False or rexray.upgrade == True
-  notify: "[systemd] Restart"
+  notify: "[systemd] Reload"
 
 - block:
   - name: "[file] Ensure that /etc/rexray exists"

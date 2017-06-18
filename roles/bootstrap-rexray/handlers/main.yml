@@ -2,6 +2,14 @@
 - name: "[systemd] Restart"
   become: true
   systemd:
-    name: docker
+    name: rexray
     state: restarted
+  when: rexray.storage_type == "virtualbox"
+
+- name: "[systemd] Reload"
+  become: true
+  systemd:
+    name: rexray
+    state: restarted
+    daemon_reload: yes
   when: rexray.storage_type == "virtualbox"
