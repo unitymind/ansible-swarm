@@ -1,0 +1,66 @@
+---
+- name: "[apt] Ensure that apitude installed with cache update"
+  become: true
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: yes
+
+- name: "[apt] Full upgrade"
+  become: true
+  apt:
+    upgrade: full
+  when: upgrade_mode == 'full'
+
+- name: "[apt] Dist upgrade"
+  become: true
+  apt:
+    upgrade: dist
+  when: upgrade_mode == 'dist'
+
+- name: "[shell] Upgrade packages"
+  become: true
+  shell: >
+    apt-get upgrade -y
+  args:
+    warn: false
+  when: upgrade_mode == 'packages'
+
+- name: "[lineinfile] Update /etc/default/grub"
+  become: true
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT='
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet cgroup_enable=memory swapaccount=1"'
+  register: grub_update
+
+- name: "[shell] Update grub and reboot machine"
+  become: true
+  shell: >
+    update-grub
+  when: grub_update | changed
+
+- name: "[stat] Check if a reboot is required"
+  stat:
+    path: /var/run/reboot-required
+    get_md5: no
+  register: reboot_required
+
+- block:
+  - name: "[shell] Reboot"
+    become: true
+    shell: >
+      sleep 2 && reboot
+    async: 1
+    poll: 0
+    ignore_errors: true
+
+  - name: "[waif_for] Server to come back online after reboot"
+    connection: local
+    wait_for:
+      port: 22
+      host: "{{ hostvars[inventory_hostname]['ansible_' + (external_iface | default('eth0'))]['ipv4']['address'] }}"
+      search_regex: OpenSSH
+      delay: 15
+
+  when: (reboot_required.stat.exists == True) or (grub_update | changed)

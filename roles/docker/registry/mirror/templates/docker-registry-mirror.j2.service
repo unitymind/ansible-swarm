@@ -1,0 +1,23 @@
+[Unit]
+Description=Docker Local Registry Mirror via Proxy
+Requires=weavenet.service
+After=weavenet.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill registry-mirror-{{ inventory_hostname }}
+ExecStartPre=-/usr/bin/docker rm registry-mirror-{{ inventory_hostname }}
+ExecStartPre=/usr/bin/docker pull nginx:{{ docker.registry.mirror.nginx_image_tag }}
+ExecStart=/usr/bin/docker run --name registry-mirror-{{ inventory_hostname }} \
+  -v /etc/nginx/conf.d/docker-registry-mirror.conf:/etc/nginx/conf.d/docker-registry-mirror.conf \
+  -p 127.0.0.1:{{  docker.registry.mirror.port }}:80 \
+  --net weave --hostname registry-mirror-{{ inventory_hostname }}.weave.local \
+  --dns 172.17.0.1 --dns-search weave.local. \
+  nginx:{{ docker.registry.mirror.nginx_image_tag }}
+
+ExecStop=-/usr/bin/docker stop registry-mirror
+Restart=always
+RestartSec=10s
+TimeoutStartSec=300s
+
+[Install]
+WantedBy=multi-user.target

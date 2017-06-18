@@ -1,0 +1,22 @@
+[Unit]
+Description=Docker Internal Private Proxy via Socat
+Requires=weavenet.service
+After=weavenet.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker kill socat-proxy-{{ inventory_hostname }}
+ExecStartPre=-/usr/bin/docker rm socat-proxy-{{ inventory_hostname }}
+ExecStartPre=/usr/bin/docker pull cleawing/socat:1.7.3.2
+ExecStart=/usr/bin/docker run --name socat-proxy-{{ inventory_hostname }} \
+  --net weave --hostname socat-{{ inventory_hostname }}.weave.local \
+  --dns 172.17.0.1 --dns-search weave.local. \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  cleawing/socat:1.7.3.2 socat -d -d TCP-L:2375,fork UNIX:/var/run/docker.sock
+
+ExecStop=-/usr/bin/docker stop socat-proxy-{{ inventory_hostname }}
+Restart=always
+RestartSec=10s
+TimeoutStartSec=300s
+
+[Install]
+WantedBy=multi-user.target

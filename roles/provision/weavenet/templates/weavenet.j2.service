@@ -1,0 +1,19 @@
+[Unit]
+Description=Weave Network
+Documentation=http://docs.weave.works/weave/latest_release/
+Requires=docker.service
+After=docker.service
+
+[Service]
+EnvironmentFile=/etc/default/weave
+ExecStartPre=/usr/local/bin/weave launch-router --no-restart --ipalloc-range {{ weave.ipalloc_range }} $PEERS
+ExecStartPre=/usr/local/bin/weave launch-plugin --no-restart
+ExecStart=/usr/bin/docker attach weave
+ExecStop=/usr/local/bin/weave stop
+
+Restart=always
+RestartSec=10s
+TimeoutStartSec=300s
+
+[Install]
+WantedBy=multi-user.target

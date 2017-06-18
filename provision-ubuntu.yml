@@ -1,0 +1,44 @@
+- hosts: all
+  vars:
+    upgrade_mode: full
+  roles:
+    - role: provision/os/upgrade
+      tags:
+        - provision
+        - upgrade
+    - role: provision/os/bootstrap
+      tags:
+        - provision
+        - os
+    - role: provision/rexray
+      tags:
+        - provision
+        - rexray
+    - role: provision/docker
+      tags:
+        - provision
+        - docker
+    - role: provision/weavenet
+      tags:
+        - provision
+        - weave
+        - weavenet
+    - role: provision/docker/proxy
+      tags:
+        - docker
+        - docker_proxy
+
+- hosts: manager
+  roles:
+    - role: docker/registry
+      tags:
+        - docker
+        - docker_registry
+
+- hosts: manager, worker
+  roles:
+    - role: docker/registry/mirror
+      tags:
+        - docker
+        - docker_registry
+        - docker_registry_mirror

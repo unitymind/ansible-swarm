@@ -1,0 +1,96 @@
+---
+
+- name: "[stat] Check is installed"
+  become: true
+  stat:
+    path: /usr/bin/rexray
+  register: rexray_file
+
+- name: "[file] Ensure that /etc/systemd/system/rexray.service.d exists"
+  become: true
+  file:
+    path: /etc/systemd/system/rexray.service.d
+    state: directory
+    mode: 0755
+
+- name: "[copy] Drop-ins for rexray.service"
+  become: true
+  copy:
+    src: rexray.service.d/10-restart-policy.conf
+    dest: /etc/systemd/system/rexray.service.d/10-restart-policy.conf
+    mode: 0600
+  notify: "[systemd] Reload"
+
+- name: "[shell] Install"
+  become: true
+  shell: >
+    curl -sSL https://dl.bintray.com/emccode/rexray/install | sh -s -- stable {{ rexray.version }}
+  args:
+    warn: false
+  when: rexray_file.stat.exists == False or rexray.upgrade == True
+  notify: "[systemd] Reload"
+
+- block:
+  - name: "[file] Ensure that /etc/rexray exists"
+    become: true
+    file:
+      path: /etc/rexray
+      state: directory
+      mode: 0755
+
+  - name: "[template] Build config for Virtualbox"
+    become: true
+    template:
+      src: rexray_config_virtualbox.j2.yml
+      dest: /etc/rexray/config.yml
+      mode: 0600
+    notify: "[systemd] Restart"
+
+#  - name: Generate config for DigitalOcean
+#    become: true
+#    template:
+#      src: rexray_config_digitalocean.j2.yml
+#      dest: /etc/rexray/config.yml
+#      mode: 0600
+#    when: rexray.storage_type == "digitalocean"
+#    notify: Restart
+
+  - name: "[systemd] Ensure that started"
+    become: true
+    systemd:
+      name: rexray
+      state: started
+
+  when: rexray.storage_type == "virtualbox"
+
+- block:
+  - name: "[shell] Check if plugin installed"
+    shell: >
+      docker plugin ls | grep 'rexray/dobs'
+    register: docker_plugin_installed
+
+  - name: "[shell] Install Rexray DigitalOcean docker volume plugin"
+    shell: >
+      docker plugin install --grant-all-permissions rexray/dobs:{{ rexray.version }} \
+        DOBS_REGION={{ digitalocean.region }} \
+        DOBS_TOKEN={{ digitalocean.token }}
+    when: docker_plugin_installed | failed
+
+  - name: "[shell] Upgrade Rexray DigitalOcean docker volume plugin"
+    shell: >
+      docker plugin upgade --grant-all-permissions rexray/dobs:{{ rexray.version }}
+    when: "rexray.upgrade == True and (docker_plugin_installed | success)"
+
+  - name: "[systemd] Ensure that system service is disabled and stopped"
+    become: true
+    systemd:
+      name: rexray
+      state: stopped
+      enabled: false
+
+  - name: "[shell] Ensure that plugin installed and enabled"
+    shell: >
+      docker plugin enable rexray/dobs:{{ rexray.version }} \
+      && docker plugin ls | grep 'rexray/dobs:{{ rexray.version }}' | grep 'true'
+
+  when: rexray.storage_type == "digitalocean"

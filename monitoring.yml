@@ -1,0 +1,13 @@
+- hosts: all
+  roles:
+    - role: monitoring/weavescope
+      tags:
+        - docker
+        - swarm
+        - weave
+        - weavescope
+    - role: monitoring/portainer
+      tags:
+        - docker
+        - portainer
+      when: inventory_hostname in groups['monitoring']

@@ -1,0 +1,30 @@
+---
+- name: "[template] Build /etc/systemd/system/docker-socat-proxy.service from template"
+  become: true
+  template:
+    src: docker-socat-proxy.j2.service
+    dest: /etc/systemd/system/docker-socat-proxy.service
+    mode: 0640
+  register: docker_socat_proxy_service
+
+- name: "[systemd] Enable and start"
+  become: true
+  systemd:
+    name: docker-socat-proxy
+    enabled: yes
+    state: started
+  register: docker_socat_proxy_service_enable
+
+- name: "[systemd] Restart if service changed"
+  become: true
+  systemd:
+    name: docker-registry
+    daemon_reload: yes
+    state: restarted
+  when: (docker_socat_proxy_service | changed) and docker_socat_proxy_service_enable.changed == False
+
+- name: "[systemd] Ensure that started"
+  become: true
+  systemd:
+    name: docker-socat-proxy
+    state: started

@@ -1,0 +1,27 @@
+---
+- name: "[apt] Ensure present of latest packages"
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
+    - python-setuptools
+    - zfs
+
+- name: "[easy_install] Install latest pip"
+  become: true
+  easy_install:
+    name: pip
+    state: latest
+
+- name: "[pip] Ensure present of packages"
+  become: true
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+    state: present
+  with_items: "{{ bootstrap.pip }}"

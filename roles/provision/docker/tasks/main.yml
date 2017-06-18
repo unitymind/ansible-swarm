@@ -1,0 +1,55 @@
+---
+- name: "[file] Ensure that /etc/docker exists"
+  become: true
+  file:
+    path: /etc/docker
+    state: directory
+    mode: 0755
+
+- name: "[template] Build /etc/docker/daemon.json"
+  become: true
+  template:
+    src: daemon.j2.json
+    dest: /etc/docker/daemon.json
+    mode: 0600
+  notify: "[systemd] Reload Docker"
+
+- name: "[stat] Check is Docker installed"
+  stat:
+    path: /usr/bin/docker
+  register: docker_installed
+
+- block:
+  - name: "[shell] Add Docker’s official GPG key"
+    become: true
+    shell: >
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+
+  - name: "[shell] Add apt repositories"
+    become: true
+    shell: >
+      add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial {{ item }}"
+    with_items:
+      - stable
+      - edge
+      - test
+
+  when: docker_installed.stat.exists == False
+
+- name: "[apt] Install docker-ce with cache update"
+  become: true
+  apt:
+    name: "docker-ce={{ docker.version }}"
+    state: present
+    update_cache: yes
+    force: "{{'yes' if docker.upgrade == 'forced' else 'no' }}"
+  when: (docker_installed.stat.exists == False) or (docker.upgrade in ['yes', 'forced'])
+
+- name: "[shell] Add current user to docker group"
+  become: true
+  shell: >
+    usermod -aG docker {{ ansible_ssh_user }}
+  when: docker_installed.stat.exists == False
+
+  # TODO. Tune the Kernel. https://github.com/docker/docker/blob/master/contrib/check-config.sh

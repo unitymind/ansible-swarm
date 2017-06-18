@@ -1,0 +1,36 @@
+---
+- name: "[template] Generate /etc/systemd/system/weavescope.service"
+  become: true
+  template:
+    src: weavescope.j2.service
+    dest: /etc/systemd/system/weavescope.service
+    mode: 0640
+  register: weavescope_service
+
+- name: "[systemd] Ensure that enabled"
+  become: true
+  systemd:
+    name: weavescope
+    enabled: true
+
+- name: "[get_url] Get latest /usr/local/bin/scope"
+  become: true
+  get_url:
+    url: https://git.io/scope
+    dest: /usr/local/bin/scope
+    mode: 0755
+  register: scope_script
+
+- name: "[systemd] Restart if service changed"
+  become: true
+  systemd:
+    name: weavescope
+    daemon_reload: yes
+    state: restarted
+  when: (weavescope_service | changed) or (scope_script | changed)
+
+- name: "[systemd] Ensure that started"
+  become: true
+  systemd:
+    name: weavescope
+    state: started

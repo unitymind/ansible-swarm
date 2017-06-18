@@ -1,4 +1,0 @@
-libstorage:
-  service: virtualbox
-virtualbox:
-  volumePath: "{{ rexray.virtualbox.volume_path }}"
